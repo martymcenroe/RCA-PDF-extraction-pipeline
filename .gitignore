@@ -52,3 +52,15 @@ coverage.xml
 
 # Build artifacts
 *.generated.json
+
+# PDF extraction output (large files)
+data/output/*.db
+data/output/*.json
+data/output/*.csv
+data/output/*_images/
+
+# Large input files
+*.pdf
+
+# Playwright MCP
+.playwright-mcp/

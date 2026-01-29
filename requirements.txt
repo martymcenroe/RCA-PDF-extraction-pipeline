@@ -1,0 +1,10 @@
+# Core dependencies (required for minimal solution)
+PyMuPDF>=1.24.0
+
+# Extended solution (elementizer CLI + viewer)
+flask>=3.0.0
+click>=8.0.0
+
+# Legacy (table_extractor.py - not used in final solution)
+# pdfplumber>=0.11.0
+# pandas>=2.0.0
