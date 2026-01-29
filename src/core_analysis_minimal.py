@@ -185,103 +185,135 @@ class CoreAnalysisMinimal:
         return samples
 
     def _parse_sample_lines(self, lines: list, page_number: int) -> Optional[Sample]:
-        """Parse vertical sample lines into a Sample object."""
-        if len(lines) < 5:
+        """Parse vertical sample lines into a Sample object.
+
+        Logic ported from core_analysis.py to ensure correct field alignment.
+        """
+        try:
+            if len(lines) < 5:
+                return None
+
+            core_num = lines[0]
+            sample_num = lines[1]
+            depth = self._parse_depth(lines[2])
+
+            if depth is None:
+                return None
+
+            # Remaining values after core, sample, depth
+            values = lines[3:]
+
+            perm_air = None
+            perm_klink = None
+            porosity_amb = None
+            porosity_ncs = None
+            grain_density = None
+            sat_water = None
+            sat_oil = None
+            sat_total = None
+            notes = ""
+
+            idx = 0
+
+            # Permeability to Air (can be number, "<X", or "+")
+            if idx < len(values):
+                val = values[idx]
+                if val == '+':
+                    # Fracture sample: no permeability measurement
+                    notes = "fracture"
+                    idx += 1
+                    # For fractures: porosity, grain_density, then saturations
+                    if idx < len(values):
+                        porosity_amb = self._parse_float(values[idx])
+                        idx += 1
+                    if idx < len(values):
+                        grain_density = self._parse_float(values[idx])
+                        idx += 1
+                elif val.startswith('<'):
+                    # Below detection limit
+                    perm_air = val  # Keep as string to preserve "<"
+                    notes = f"perm{val}"
+                    idx += 1
+                    # For <X: porosity_amb, porosity_ncs, grain_density, then saturations
+                    if idx < len(values):
+                        porosity_amb = self._parse_float(values[idx])
+                        idx += 1
+                    if idx < len(values):
+                        porosity_ncs = self._parse_float(values[idx])
+                        idx += 1
+                    if idx < len(values):
+                        grain_density = self._parse_float(values[idx])
+                        idx += 1
+                else:
+                    # Normal numeric permeability
+                    perm_air = self._parse_float(val)
+                    idx += 1
+                    # Klinkenberg permeability
+                    if idx < len(values):
+                        perm_klink = self._parse_float(values[idx])
+                        idx += 1
+                    # Porosity Ambient
+                    if idx < len(values):
+                        porosity_amb = self._parse_float(values[idx])
+                        idx += 1
+                    # Porosity NCS
+                    if idx < len(values):
+                        porosity_ncs = self._parse_float(values[idx])
+                        idx += 1
+                    # Grain Density
+                    if idx < len(values):
+                        grain_density = self._parse_float(values[idx])
+                        idx += 1
+
+            # Fluid Saturations (remaining values, or ** for none)
+            if idx < len(values):
+                val = values[idx]
+                if val == '**':
+                    notes = (notes + "; no_saturations").strip("; ")
+                else:
+                    sat_water = self._parse_float(val)
+                    idx += 1
+                    if idx < len(values):
+                        sat_oil = self._parse_float(values[idx])
+                        idx += 1
+                    if idx < len(values):
+                        sat_total = self._parse_float(values[idx])
+
+            return Sample(
+                core_number=core_num,
+                sample_number=sample_num,
+                depth_feet=str(depth) if depth else "",
+                permeability_air_md=str(perm_air) if perm_air is not None else "",
+                permeability_klink_md=str(perm_klink) if perm_klink is not None else "",
+                porosity_ambient_pct=str(porosity_amb) if porosity_amb is not None else "",
+                porosity_ncs_pct=str(porosity_ncs) if porosity_ncs is not None else "",
+                grain_density_gcc=str(grain_density) if grain_density is not None else "",
+                saturation_water_pct=str(sat_water) if sat_water is not None else "",
+                saturation_oil_pct=str(sat_oil) if sat_oil is not None else "",
+                saturation_total_pct=str(sat_total) if sat_total is not None else "",
+                page_number=page_number,
+                notes=notes,
+            )
+        except Exception:
             return None
 
-        sample = Sample(page_number=page_number)
-        sample.core_number = lines[0]
-        sample.sample_number = lines[1]
-        sample.depth_feet = lines[2].replace(',', '')
+    def _parse_depth(self, value: str) -> Optional[float]:
+        """Parse a depth value like '9,580.50'."""
+        try:
+            cleaned = value.replace(',', '')
+            return float(cleaned)
+        except ValueError:
+            return None
 
-        # Remaining values
-        values = lines[3:]
-        idx = 0
-
-        # First value is permeability_air or "+" for fractures
-        if idx < len(values):
-            val = values[idx]
-            if val == '+':
-                # Fracture sample: +, porosity, grain_density, [saturations]
-                sample.notes = "fracture"
-                idx += 1
-                if idx < len(values):
-                    sample.porosity_ambient_pct = values[idx]
-                    idx += 1
-                if idx < len(values):
-                    sample.grain_density_gcc = values[idx]
-                    idx += 1
-            elif val.startswith('<'):
-                # Below detection: <0.0001, porosity, [porosity_ncs], grain_density, [saturations]
-                sample.permeability_air_md = val
-                sample.notes = f"below_detection({val})"
-                idx += 1
-                # Parse remaining values
-                remaining = values[idx:]
-                self._parse_remaining_values(sample, remaining)
-                return sample
-            else:
-                # Normal: perm_air, perm_klink, por_amb, por_ncs, grain_den, sat_w, sat_o, sat_t
-                sample.permeability_air_md = val
-                idx += 1
-                if idx < len(values):
-                    sample.permeability_klink_md = values[idx]
-                    idx += 1
-
-        # Continue with porosity values
-        if idx < len(values):
-            sample.porosity_ambient_pct = values[idx]
-            idx += 1
-        if idx < len(values) and not values[idx].startswith('2.'):
-            # porosity_ncs if not already at grain density
-            sample.porosity_ncs_pct = values[idx]
-            idx += 1
-
-        # Grain density (always 2.xx)
-        if idx < len(values):
-            sample.grain_density_gcc = values[idx]
-            idx += 1
-
-        # Saturations (may be ** for no data)
-        if idx < len(values) and values[idx] != '**':
-            sample.saturation_water_pct = values[idx]
-        idx += 1
-        if idx < len(values) and values[idx] != '**':
-            sample.saturation_oil_pct = values[idx]
-        idx += 1
-        if idx < len(values) and values[idx] != '**':
-            sample.saturation_total_pct = values[idx]
-
-        return sample
-
-    def _parse_remaining_values(self, sample: Sample, values: list):
-        """Parse remaining values after permeability for below-detection samples."""
-        # Look for grain density (2.xx) to anchor the parsing
-        grain_idx = None
-        for i, v in enumerate(values):
-            if re.match(r'^2\.\d{2}$', v):
-                grain_idx = i
-                break
-
-        if grain_idx is None:
-            return
-
-        # Values before grain density are porosities
-        if grain_idx >= 1:
-            sample.porosity_ambient_pct = values[grain_idx - 1]
-        if grain_idx >= 2:
-            sample.porosity_ncs_pct = values[grain_idx - 2]
-
-        sample.grain_density_gcc = values[grain_idx]
-
-        # Values after grain density are saturations
-        sat_values = values[grain_idx + 1:]
-        if len(sat_values) >= 1 and sat_values[0] != '**':
-            sample.saturation_water_pct = sat_values[0]
-        if len(sat_values) >= 2 and sat_values[1] != '**':
-            sample.saturation_oil_pct = sat_values[1]
-        if len(sat_values) >= 3 and sat_values[2] != '**':
-            sample.saturation_total_pct = sat_values[2]
+    def _parse_float(self, value: str) -> Optional[float]:
+        """Parse a float value, handling special cases."""
+        try:
+            if not value or value in ('**', '+', '-'):
+                return None
+            cleaned = value.replace(',', '')
+            return float(cleaned)
+        except ValueError:
+            return None
 
     def save_csv(self, result: ExtractionResult, output_path: Path):
         """Save samples to CSV."""
