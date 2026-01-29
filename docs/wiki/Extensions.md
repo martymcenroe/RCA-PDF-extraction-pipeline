@@ -41,19 +41,21 @@ src/elementizer/
 
 ```bash
 # Extract PDF to database
-python -m src.elementizer.main extract <pdf> --output <dir>
+python -m src.elementizer.main extract docs/context/init/W20552.pdf \
+    --output data/output/extended/
 
 # Search text
-python -m src.elementizer.main search <db> "ROUTINE CORE"
+python -m src.elementizer.main search data/output/extended/W20552_elements.db "ROUTINE CORE"
 
 # Show page details
-python -m src.elementizer.main page <db> 39
+python -m src.elementizer.main page data/output/extended/W20552_elements.db 39
 
 # Statistics
-python -m src.elementizer.main stats <db>
+python -m src.elementizer.main stats data/output/extended/W20552_elements.db
 
 # Web viewer
-python -m src.elementizer.main view <db> --images <dir>
+python -m src.elementizer.main view data/output/extended/W20552_elements.db \
+    --images data/output/extended/W20552_images
 ```
 
 ### Use Cases
@@ -102,14 +104,17 @@ Text Blocks:
 
 ```bash
 # Start viewer on port 5000
-python -m src.elementizer.main view data/output/W20552_elements.db \
-    --images data/output/W20552_images
+python -m src.elementizer.main view data/output/extended/W20552_elements.db \
+    --images data/output/extended/W20552_images
 
 # Custom port
-python -m src.elementizer.main view <db> --port 8080
+python -m src.elementizer.main view data/output/extended/W20552_elements.db \
+    --images data/output/extended/W20552_images --port 8080
 ```
 
 Then open http://127.0.0.1:5000 in browser.
+
+**Note:** The viewer is cross-platform (Windows, macOS, Linux).
 
 ### Routes
 
@@ -139,11 +144,11 @@ Alternative extraction pipeline using the elementizer database.
 ```bash
 # Step 1: Extract to database (one-time)
 python -m src.elementizer.main extract docs/context/init/W20552.pdf \
-    --output data/output/
+    --output data/output/extended/
 
 # Step 2: Run extraction
-python src/core_analysis.py data/output/W20552_elements.db \
-    --output data/output/
+python src/core_analysis.py data/output/extended/W20552_elements.db \
+    --output data/output/extended/
 ```
 
 ### Code Structure
