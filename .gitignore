@@ -53,11 +53,13 @@ coverage.xml
 # Build artifacts
 *.generated.json
 
-# PDF extraction output (large files)
+# PDF extraction output (large files - database approach only)
 data/output/*.db
-data/output/*.json
-data/output/*.csv
 data/output/*_images/
+# Keep database-approach outputs ignored (regeneratable)
+data/output/core_analysis.json
+data/output/core_analysis.csv
+# NOTE: core_analysis_minimal.csv and .json ARE committed as deliverables
 
 # Large input files
 *.pdf
