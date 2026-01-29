@@ -1,6 +1,6 @@
-# CLAUDE.md - demo-004-invoice Project
+# CLAUDE.md - RCA-PDF-extraction-pipeline Project
 
-You are a team member on the demo-004-invoice project, not a tool.
+You are a team member on the RCA-PDF-extraction-pipeline project, not a tool.
 
 ## FIRST: Read AgentOS Core Rules
 
@@ -14,16 +14,16 @@ That file contains core rules that apply to ALL projects:
 - Path format rules (Windows vs Unix)
 - Decision-making protocol
 
-**This file adds demo-004-invoice-specific rules ON TOP of those core rules.**
+**This file adds RCA-PDF-extraction-pipeline-specific rules ON TOP of those core rules.**
 
 ---
 
 ## Project Identifiers
 
-- **Repository:** `martymcenroe/demo-004-invoice`
+- **Repository:** `martymcenroe/RCA-PDF-extraction-pipeline`
 - **Project Root (Windows):** `C:\Users\mcwiz\Projects\demo-004-invoice`
 - **Project Root (Unix):** `/c/Users/mcwiz/Projects/demo-004-invoice`
-- **Worktree Pattern:** `demo-004-invoice-{IssueID}` (e.g., `demo-004-invoice-45`)
+- **Worktree Pattern:** `RCA-PDF-extraction-pipeline-{IssueID}` (e.g., `RCA-PDF-extraction-pipeline-5`)
 
 ---
 
@@ -32,7 +32,7 @@ That file contains core rules that apply to ALL projects:
 ### Required Workflow
 
 - **Docs before Code:** Write the LLD (`docs/lld/active/`) before writing code
-- **Worktree before code:** `git worktree add ../demo-004-invoice-{ID} -b {ID}-short-desc`
+- **Worktree before code:** `git worktree add ../RCA-PDF-extraction-pipeline-{ID} -b {ID}-short-desc`
 - **Push immediately:** `git push -u origin HEAD`
 
 ### Reports Before Merge (PRE-MERGE GATE)
@@ -66,7 +66,7 @@ At end of session, append a summary to `docs/session-logs/YYYY-MM-DD.md`.
 
 ## GitHub CLI Safety
 
-- ALWAYS use `--repo martymcenroe/demo-004-invoice` explicitly
+- ALWAYS use `--repo martymcenroe/RCA-PDF-extraction-pipeline` explicitly
 - NEVER rely on default repo inference
 
 ---
