@@ -1,0 +1,26 @@
+The Context: At NthDS, we automate the digitization of legacy subsurface records. The challenge is that these documents are unstructured, scanned PDFs containing valuable geological data locked in tables, plots, and text.
+
+The Task: Attached is a public Routine Core Analysis (RCA) file. Your goal is to build a small pipeline that can ingest this document and perform two tasks:
+
+1. Page Classification
+
+    Programmatically identify which pages in the document contain tabular Core Analysis data and which pages do not (e.g., cover pages, text summaries, or plots).
+    Output: A simple list or dictionary identifying the "Table Pages" (e.g., {'page_5': 'table', 'page_6': 'table', 'page_1': 'other'}).
+
+2. Full Table Extraction
+
+    Iterate through all pages identified as containing tables.
+    Extract the data from every table found.
+    Requirement: Consolidate the extracted data into a single structured dataset (CSV or JSON). You must preserve column headers (e.g., Sample Number, Permeability, Porosity) and handle any potential header variations across pages.
+
+What We Are Looking For:
+
+    Engineering Quality: Is the code modular and clean?
+    Scalability: Does your solution loop efficiently through the document?
+    Approach: How do you handle the "noise" (e.g., headers, footers, scan artifacts)?
+    Tool Selection: You are free to use open-source libraries (e.g., OpenCV, PyTesseract, LayoutLM) or APIs (OpenAI, AWS, Azure), but be prepared to explain your choice and cost/latency trade-offs.
+
+Deliverables:
+
+    The source code (GitHub link or Zip file).
+    A brief README explaining your approach and how to run the code.
