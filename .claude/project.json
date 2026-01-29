@@ -1,0 +1,11 @@
+{
+  "variables": {
+    "PROJECT_ROOT": "/c/Users/mcwiz/Projects/demo-004-invoice",
+    "PROJECT_ROOT_WINDOWS": "C:\\Users\\mcwiz\\Projects\\demo-004-invoice",
+    "PROJECT_NAME": "demo-004-invoice",
+    "GITHUB_REPO": "martymcenroe/demo-004-invoice",
+    "TOOLS_DIR": "/c/Users/mcwiz/Projects/demo-004-invoice/tools",
+    "WORKTREE_PATTERN": "demo-004-invoice-{ID}"
+  },
+  "inherit_from": "C:\\Users\\mcwiz\\Projects\\AgentOS"
+}
