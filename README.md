@@ -56,11 +56,11 @@ core_number,sample_number,depth_feet,permeability_air_md,...
 
 | Document | Contents |
 |----------|----------|
-| [Wiki Home](https://github.com/martymcenroe/demo-004-invoice/wiki) | Navigation and quick start |
-| [Requirements](https://github.com/martymcenroe/demo-004-invoice/wiki/Requirements) | Assignment requirements and deliverables |
-| [Architecture](https://github.com/martymcenroe/demo-004-invoice/wiki/Architecture) | Design decisions and trade-offs |
-| [Performance](https://github.com/martymcenroe/demo-004-invoice/wiki/Performance) | Benchmarks and scalability |
-| [Extensions](https://github.com/martymcenroe/demo-004-invoice/wiki/Extensions) | Database approach and web viewer |
+| [Wiki Home](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki) | Navigation and quick start |
+| [Requirements](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Requirements) | Assignment requirements and deliverables |
+| [Architecture](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Architecture) | Design decisions and trade-offs |
+| [Performance](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Performance) | Benchmarks and scalability |
+| [Extensions](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Extensions) | Database approach and web viewer |
 
 ## Project Structure
 
