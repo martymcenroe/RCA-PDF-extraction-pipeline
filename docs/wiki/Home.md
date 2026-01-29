@@ -36,12 +36,25 @@ core-analysis docs/context/init/W20552.pdf --output data/output/
 
 ## Output
 
-The pipeline produces two files:
+Outputs are organized into two directories:
+
+### `data/output/spec/` - Assignment Deliverable
 
 | File | Format | Contents |
 |------|--------|----------|
-| `core_analysis_minimal.csv` | CSV | 138 sample records with 11 data columns |
-| `core_analysis_minimal.json` | JSON | Page classifications + sample data |
+| `core_analysis.csv` | CSV | 138 sample records with 11 data columns |
+| `core_analysis.json` | JSON | Page classifications + sample data |
+
+### `data/output/extended/` - Database Approach + Viewer
+
+| File | Format | Contents |
+|------|--------|----------|
+| `core_analysis.csv` | CSV | Same data, produced via database pipeline |
+| `core_analysis.json` | JSON | Same data, produced via database pipeline |
+| `W20552_elements.db` | SQLite | 224K extracted PDF elements |
+| `W20552_images/` | PNG files | 468 extracted images |
+
+See [[Extensions]] for viewer usage.
 
 ## Results Summary
 
