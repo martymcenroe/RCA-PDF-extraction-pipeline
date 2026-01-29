@@ -1,8 +1,8 @@
 # Idea: Header Normalization Across Pages
 
-**Status:** Required (missed requirement)
+**Status:** Blocker (missed requirement)
 **Effort:** Medium (4-8 hours)
-**Value:** High - core assignment requirement
+**Value:** Critical - core assignment requirement
 
 ---
 
