@@ -21,8 +21,8 @@ That file contains core rules that apply to ALL projects:
 ## Project Identifiers
 
 - **Repository:** `martymcenroe/RCA-PDF-extraction-pipeline`
-- **Project Root (Windows):** `C:\Users\mcwiz\Projects\demo-004-invoice`
-- **Project Root (Unix):** `/c/Users/mcwiz/Projects/demo-004-invoice`
+- **Project Root (Windows):** `C:\Users\mcwiz\Projects\RCA-PDF-extraction-pipeline`
+- **Project Root (Unix):** `/c/Users/mcwiz/Projects/RCA-PDF-extraction-pipeline`
 - **Worktree Pattern:** `RCA-PDF-extraction-pipeline-{IssueID}` (e.g., `RCA-PDF-extraction-pipeline-5`)
 
 ---
