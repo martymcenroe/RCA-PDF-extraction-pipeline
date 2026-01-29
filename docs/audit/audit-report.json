@@ -1,0 +1,154 @@
+[
+  {
+    "req_id": "F1",
+    "name": "Classification output exists",
+    "status": "PASS",
+    "message": "Found 253 page classifications",
+    "evidence": "Keys: ['page_1', 'page_2', 'page_3', 'page_4', 'page_5']...",
+    "brief": ""
+  },
+  {
+    "req_id": "F2",
+    "name": "Table pages identified",
+    "status": "PASS",
+    "message": "Found 4 table pages",
+    "evidence": "['page_39', 'page_40', 'page_41', 'page_42']",
+    "brief": ""
+  },
+  {
+    "req_id": "F3",
+    "name": "Non-table pages identified",
+    "status": "PASS",
+    "message": "Found 249 non-table pages",
+    "evidence": "Types: {'other', 'cover', 'text', 'table', 'plot'}",
+    "brief": ""
+  },
+  {
+    "req_id": "F4",
+    "name": "Extraction matches classification",
+    "status": "PASS",
+    "message": "All extracted pages ({40, 41, 42, 39}) are classified as table",
+    "evidence": "Table pages: {40, 41, 42, 39}",
+    "brief": ""
+  },
+  {
+    "req_id": "F5",
+    "name": "All tables extracted",
+    "status": "PASS",
+    "message": "Extracted 138 rows (expected 138)",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "F6",
+    "name": "Consolidated output exists",
+    "status": "PASS",
+    "message": "Both CSV and JSON outputs exist",
+    "evidence": "CSV: 8564 bytes, JSON: 69443 bytes",
+    "brief": ""
+  },
+  {
+    "req_id": "F7",
+    "name": "Output format correct",
+    "status": "PASS",
+    "message": "Formats: CSV, JSON",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "F8",
+    "name": "Column headers preserved",
+    "status": "BLOCKER",
+    "message": "Headers are invented snake_case, not preserved from PDF",
+    "evidence": "Current: ['core_number', 'sample_number', 'depth_feet']...",
+    "brief": "005"
+  },
+  {
+    "req_id": "F9",
+    "name": "Header variations handled",
+    "status": "BLOCKER",
+    "message": "Multi-row headers and page continuations not handled",
+    "evidence": "See PDF pages 39-42 - headers span multiple rows",
+    "brief": "004"
+  },
+  {
+    "req_id": "Q1",
+    "name": "Code is modular",
+    "status": "WARN",
+    "message": "Only 1 functions - consider more modularization",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "Q2",
+    "name": "Code is clean",
+    "status": "SKIP",
+    "message": "Could not parse pylint output",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "Q3",
+    "name": "Solution loops efficiently",
+    "status": "PASS",
+    "message": "Processing time: 359ms for 253 pages",
+    "evidence": "1.4ms per page average",
+    "brief": ""
+  },
+  {
+    "req_id": "Q4",
+    "name": "Noise handled",
+    "status": "PASS",
+    "message": "No obvious noise patterns detected",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "Q5",
+    "name": "Tool selection explained",
+    "status": "PASS",
+    "message": "Tools mentioned: ['pymupdf', 'pdfplumber', 'tesseract', 'openai']",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "Q6",
+    "name": "Trade-offs documented",
+    "status": "PASS",
+    "message": "Trade-off discussion found in README.md",
+    "evidence": "Keywords: ['trade-off', 'cost', 'latency', 'performance', 'accuracy']",
+    "brief": ""
+  },
+  {
+    "req_id": "D1",
+    "name": "Source code provided",
+    "status": "PASS",
+    "message": "Found 8 Python files in src/",
+    "evidence": "['core_analysis.py', 'core_analysis_minimal.py', 'main.py', 'models.py', 'page_classifier.py', 'pdf_dissector.py', 'table_extractor.py', '__init__.py']",
+    "brief": ""
+  },
+  {
+    "req_id": "D2",
+    "name": "README exists",
+    "status": "PASS",
+    "message": "README.md exists (3304 bytes)",
+    "evidence": "",
+    "brief": ""
+  },
+  {
+    "req_id": "D3",
+    "name": "README explains approach",
+    "status": "PASS",
+    "message": "Approach explanation found",
+    "evidence": "Indicators: ['approach', 'architecture', 'design', 'pipeline']",
+    "brief": ""
+  },
+  {
+    "req_id": "D4",
+    "name": "README has run instructions",
+    "status": "PASS",
+    "message": "Run instructions with code blocks found",
+    "evidence": "Indicators: ['```bash', 'pip install', 'python ', 'quick start']",
+    "brief": ""
+  }
+]
