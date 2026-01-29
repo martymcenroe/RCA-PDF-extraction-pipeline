@@ -61,8 +61,7 @@ data/output/core_analysis.json
 data/output/core_analysis.csv
 # NOTE: core_analysis_minimal.csv and .json ARE committed as deliverables
 
-# Large input files
-*.pdf
+# Large input files (none currently ignored)
 
 # Playwright MCP
 .playwright-mcp/
