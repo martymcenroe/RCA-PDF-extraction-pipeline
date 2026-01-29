@@ -72,11 +72,11 @@ class TestSampleExtraction:
         sample = samples[0]
         assert sample.core_number == "1"
         assert sample.sample_number == "1-1"
-        assert sample.depth_feet == "9580.50"
+        assert sample.depth_feet == "9580.5"
         assert sample.permeability_air_md == "0.0011"
         assert sample.permeability_klink_md == "0.0003"
         assert sample.porosity_ambient_pct == "0.9"
-        assert sample.grain_density_gcc == "2.70"
+        assert sample.grain_density_gcc == "2.7"
         assert sample.page_number == 39
 
     def test_extract_fracture_sample(self, sample_fracture):
@@ -88,7 +88,7 @@ class TestSampleExtraction:
         sample = samples[0]
         assert sample.core_number == "1"
         assert sample.sample_number == "1-2(F)"
-        assert sample.depth_feet == "9581.50"
+        assert sample.depth_feet == "9581.5"
         assert "fracture" in sample.notes
 
     def test_extract_below_detection_sample(self, sample_below_detection):
@@ -132,7 +132,7 @@ class TestSampleParsing:
 
         assert len(samples) == 1
         # Comma should be removed from depth
-        assert samples[0].depth_feet == "9580.50"
+        assert samples[0].depth_feet == "9580.5"
 
     def test_parse_depth_without_comma(self):
         """Depth values without commas should also work."""
@@ -142,11 +142,11 @@ class TestSampleParsing:
         samples = extractor._extract_samples(text, page_number=1)
 
         assert len(samples) == 1
-        assert samples[0].depth_feet == "9580.50"
+        assert samples[0].depth_feet == "9580.5"
 
     def test_parse_sample_number_with_suffix(self):
         """Sample numbers with (F) or (f) suffix should be preserved."""
-        text = "1\n1-2(F)\n9,581.50\n+\n1.2\n2.70"
+        text = "1\n1-2(F)\n9,581.50\n+\n1.2\n2.7"
         extractor = CoreAnalysisMinimal.__new__(CoreAnalysisMinimal)
         samples = extractor._extract_samples(text, page_number=1)
 
@@ -196,10 +196,10 @@ class TestDataclass:
         sample = Sample(
             core_number="1",
             sample_number="1-1",
-            depth_feet="9580.50",
+            depth_feet="9580.5",
             page_number=39,
         )
         assert sample.core_number == "1"
         assert sample.sample_number == "1-1"
-        assert sample.depth_feet == "9580.50"
+        assert sample.depth_feet == "9580.5"
         assert sample.page_number == 39
