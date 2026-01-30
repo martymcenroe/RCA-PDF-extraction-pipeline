@@ -17,14 +17,14 @@ A Python pipeline for extracting structured data from Routine Core Analysis (RCA
 
 ```bash
 pip install -r requirements.txt
-python src/core_analysis_minimal.py docs/context/init/W20552.pdf --output data/output/
+python -m src.core_analysis data/output/extended/W20552_elements.db --output data/output/spec/ --original-headers
 ```
 
 ### Option B: poetry (for development)
 
 ```bash
 poetry install
-poetry run python src/core_analysis_minimal.py docs/context/init/W20552.pdf --output data/output/
+poetry run python -m src.core_analysis data/output/extended/W20552_elements.db --output data/output/spec/ --original-headers
 ```
 
 ### Option C: Installed package
@@ -42,15 +42,15 @@ Outputs are organized into two directories:
 
 | File | Format | Contents |
 |------|--------|----------|
-| `core_analysis.csv` | CSV | 138 sample records with 11 data columns |
-| `core_analysis.json` | JSON | Page classifications + sample data |
+| `page_classification.json` | JSON | Part 1: Page classifications |
+| `full_table_extraction.csv` | CSV | Part 2: 138 sample records with 11 data columns |
 
 ### `data/output/extended/` - Database Approach + Viewer
 
 | File | Format | Contents |
 |------|--------|----------|
-| `core_analysis.csv` | CSV | Same data, produced via database pipeline |
-| `core_analysis.json` | JSON | Same data, produced via database pipeline |
+| `page_classification.json` | JSON | Part 1: Page classifications |
+| `full_table_extraction.csv` | CSV | Part 2: Same extraction data |
 | `W20552_elements.db` | SQLite | 224K extracted PDF elements |
 | `W20552_images/` | PNG files | 468 extracted images |
 
