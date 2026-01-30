@@ -6,12 +6,13 @@ A Python pipeline for extracting structured data from Routine Core Analysis (RCA
 
 | Page | Description |
 |------|-------------|
-| [[Requirements]] | Assignment requirements and deliverables |
+| [[Assignment-Requirements]] | Audit results and deliverables |
 | [[Architecture]] | Design decisions and trade-offs |
-| [[Code-Quality]] | Modularity metrics and analysis |
-| [[Security]] | Vulnerability scanning and controls |
+| [[Clean-Code]] | Pylint score: 9.31/10 |
+| [[Security]] | Bandit scan, CSV injection protection |
 | [[Performance]] | Benchmarks and scalability analysis |
 | [[Extensions]] | Database approach and web viewer |
+| [[Quo-Vadis]] | Future directions |
 
 ## Quick Start
 
