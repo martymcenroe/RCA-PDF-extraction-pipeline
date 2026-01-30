@@ -1,43 +1,34 @@
-# Assignment Requirements Walkthrough
+# Assignment Requirements
 
-This document maps each assignment requirement to our implementation approach.
+## Audit Results
 
-## Overview
+| Req | Name | Status | Message |
+|-----|------|--------|---------|
+| F1 | Classification output exists | PASS | Found 253 page classifications |
+| F2 | Table pages identified | PASS | Found 4 table pages |
+| F3 | Non-table pages identified | PASS | Found 249 non-table pages |
+| F4 | Extraction matches classification | PASS | All extracted pages (39, 40, 41, 42) are classified as table |
+| F5 | All tables extracted | PASS | Extracted 138 rows (expected 138) |
+| F6 | Consolidated output exists | PASS | Both CSV and JSON outputs exist |
+| F7 | Output format correct | PASS | Formats: CSV, JSON |
+| F8 | Column headers preserved | PASS | Headers match PDF (7 patterns found) |
+| F9 | Header variations handled | PASS | Headers verified across pages 39, 40, 41, 42 |
+| Q1 | Code is modular | WARN | Multiple modules in src/ |
+| Q2 | Code is clean | PASS | Pylint score: 9.31/10 |
+| Q3 | Solution loops efficiently | PASS | Processing time: 359ms for 253 pages |
+| Q4 | Noise handled | WARN | Minor noise (Page Number column) |
+| Q5 | Tool selection explained | PASS | Tools mentioned: pymupdf, tesseract, openai |
+| Q6 | Trade-offs documented | PASS | Trade-off discussion found in README.md |
+| D1 | Source code provided | PASS | Found 7 Python files in src/ |
+| D2 | README exists | PASS | README.md exists |
+| D3 | README explains approach | PASS | Approach explanation found |
+| D4 | README has run instructions | PASS | Run instructions with code blocks found |
 
-The assignment asks us to build a PDF extraction pipeline for Routine Core Analysis (RCA) reports. The pipeline must:
-1. Classify pages by type
-2. Extract tabular data
-3. Handle multi-page tables correctly
+**Summary: 17 PASS, 2 WARN, 0 FAIL, 0 BLOCKER**
 
-## Requirements and Implementation
+---
 
-### 1. Page Classification
-
-**Requirement:** Classify each page as table, plot, cover, text, or other.
-
-**Our Approach:**
-- `_classify_page()` method in `core_analysis.py`
-- Keyword-based classification with confidence scoring
-- Output: `page_classification.json` with format `{"page_1": "type", ...}`
-
-**Key Classifications:**
-- `table`: Pages containing "SUMMARY OF ROUTINE CORE ANALYSES" (pages 39-42)
-- `plot`: Pages with "PROFILE PLOT", "VERSUS POROSITY", "CROSS PLOT"
-- `cover`: Pages with "CORE ANALYSIS REPORT", "TABLE OF CONTENTS"
-- `text`: Dense text without table markers
-- `other`: Everything else
-
-### 2. Table Data Extraction
-
-**Requirement:** Extract all data from the summary table into a structured format.
-
-**Our Approach:**
-- Column boundary detection using predefined X-coordinate ranges
-- Multi-row header flattening (4-row header structure)
-- Sample parsing with depth value anchoring
-- Output: `full_table_extraction.csv`
-
-**Exact Column Headers (from PDF):**
+## Column Headers (Exact from PDF)
 
 | # | Header |
 |---|--------|
@@ -52,82 +43,27 @@ The assignment asks us to build a PDF extraction pipeline for Routine Core Analy
 | 9 | Fluid Saturations, percent Water |
 | 10 | Fluid Saturations, percent Oil |
 | 11 | Fluid Saturations, percent Total |
-| 12 | Page Number *(appended by pipeline)* |
-
-### 3. Handle Header Variations Across Pages
-
-**Requirement:** "Handle any potential header variations across pages"
-
-**Our Approach (Issue #16):**
-- Extract headers from ALL table pages, not just the first
-- Compare headers across pages for consistency
-- Output verification report to `header_verification.txt`
-- Log warnings if mismatches detected
-
-**Implementation:**
-- `verify_headers_across_pages()` method
-- `save_header_verification()` method
-- Uses first table page as reference
-
-**Rationale:** See ADR 0001 for detailed reasoning.
-
-### 4. Handle Merged Cells
-
-**Requirement:** Handle merged/spanning cells in the table.
-
-**Our Approach:**
-- Detect merged cell indicators: `+`, `**`, `<0.0001`
-- Replicate values to all columns in the group:
-  - `+` or `<X` in permeability → replicate to both Air and Klinkenberg columns
-  - `**` in saturations → replicate to all three saturation columns
-
-**Example:**
-```
-PDF shows: <0.0001 (spanning two permeability columns)
-Output:    <0.0001, <0.0001 (in both columns)
-```
-
-### 5. CSV Injection Protection
-
-**Requirement:** (Implicit - security best practice)
-
-**Our Approach:**
-- `csv_sanitizer.py` module
-- Prefix formula characters (`=`, `+`, `-`, `@`, etc.) with single quote
-- Applied to all string values in CSV output
-
-### 6. Output Path Security
-
-**Requirement:** (Implicit - security best practice)
-
-**Our Approach:**
-- `_validate_output_path()` method
-- Whitelist of allowed output directories
-- Prevents path traversal attacks
+| 12 | Page Number *(added by pipeline)* |
 
 ## Output Files
 
-| File | Description | Assignment Part |
-|------|-------------|-----------------|
-| `page_classification.json` | Page type mapping | Part 1 |
-| `full_table_extraction.csv` | Extracted table data | Part 2 |
-| `header_verification.txt` | Header consistency check | Supplement |
+| File | Description |
+|------|-------------|
+| `page_classification.json` | `{"page_39": "table", "page_1": "other", ...}` |
+| `full_table_extraction.csv` | 138 samples with 12 columns |
+| `header_verification.txt` | Verifies headers match across pages 39-42 |
 
-## Running the Pipeline
+## Special Cases Handled
 
-```bash
-# From project root
-poetry run python -m src.core_analysis data/parsed/rca_report.db -o data/output/spec
+| Case | PDF Marker | Output |
+|------|------------|--------|
+| Below detection limit | `<0.0001` | Preserved, replicated to both permeability columns |
+| Fractured sample | `+` | Preserved, replicated to both permeability columns |
+| No saturation data | `**` | Preserved, replicated to all three saturation columns |
+| Fracture indicator | `(F)` or `(f)` | Preserved in Sample Number |
 
-# With original PDF headers (instead of canonical names)
-poetry run python -m src.core_analysis data/parsed/rca_report.db -o data/output/extended --original-headers
-```
+## See Also
 
-## Verification
-
-To verify the implementation meets requirements:
-
-1. **Page Classification:** Check `page_classification.json` has entries for all pages
-2. **Table Extraction:** Verify CSV has 161 samples from pages 39-42
-3. **Header Verification:** Check `header_verification.txt` shows "VERIFIED"
-4. **Merged Cells:** Look for `+` and `**` values appearing in multiple columns
+- [Architecture](./Architecture) - Pipeline design and tool selection
+- [Clean-Code](./Clean-Code) - Pylint score: 9.31/10
+- [Security](./Security) - Bandit scan results, CSV injection protection
