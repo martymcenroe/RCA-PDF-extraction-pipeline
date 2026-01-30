@@ -146,10 +146,154 @@ class CoreAnalysisExtractor:
         "TABLE OF CONTENTS",
     ]
 
+    # Y-range for header rows on first table page
+    HEADER_Y_MIN = 170
+    HEADER_Y_MAX = 230
+
+    # Column boundaries for the RCA table (x-coordinate ranges)
+    # Each tuple is (x_min, x_max) defining a column's horizontal extent
+    COLUMN_BOUNDARIES = [
+        (40, 85),    # 0: Core Number
+        (85, 135),   # 1: Sample Number
+        (135, 200),  # 2: Depth
+        (200, 260),  # 3: Permeability Air
+        (260, 325),  # 4: Permeability Klinkenberg
+        (325, 375),  # 5: Porosity Ambient
+        (375, 410),  # 6: Porosity NCS
+        (410, 450),  # 7: Grain Density
+        (450, 490),  # 8: Saturations Water
+        (490, 530),  # 9: Saturations Oil
+        (530, 570),  # 10: Saturations Total
+    ]
+
+    # Parent headers that span multiple columns
+    # Maps (y_approx, x_center_approx) to list of column indices
+    SPANNING_HEADERS = {
+        # "Permeability," and "millidarcys" span columns 3-4
+        (193, 259): [3, 4],
+        (204, 259): [3, 4],
+        # "Porosity," and "percent" span columns 5-6
+        (193, 367): [5, 6],
+        (204, 367): [5, 6],
+        # "Fluid", "Saturations,", "percent" span columns 8-10
+        (181, 506): [8, 9, 10],
+        (193, 506): [8, 9, 10],
+        (204, 506): [8, 9, 10],
+    }
+
+    # Headers to exclude (misaligned or not actual column headers)
+    EXCLUDED_HEADERS = [
+        (193, 159),  # "Sample" at y=193, center=159 - not a column header
+    ]
+
     def __init__(self, db_path: str):
         self.db_path = Path(db_path)
         if not self.db_path.exists():
             raise FileNotFoundError(f"Database not found: {db_path}")
+        self._extracted_headers: list[str] | None = None
+
+    def _extract_headers_from_db(self, conn: sqlite3.Connection, page_num: int = 39) -> list[str]:
+        """
+        Extract and flatten multi-row table headers from the database.
+
+        The PDF has a 4-row header structure where parent categories span
+        multiple columns. This method:
+        1. Assigns text spans to columns based on predefined boundaries
+        2. Handles spanning headers that apply to multiple columns
+        3. Excludes misaligned headers
+
+        Args:
+            conn: Database connection.
+            page_num: Page number containing the table headers (default: 39).
+
+        Returns:
+            List of flattened header strings in column order.
+        """
+        cursor = conn.cursor()
+
+        # Query text spans in the header region
+        cursor.execute("""
+            SELECT ts.x0, ts.x1, ts.y0, ts.text
+            FROM text_spans ts
+            JOIN pages p ON ts.page_id = p.id
+            WHERE p.page_number = ? AND ts.y0 >= ? AND ts.y0 <= ?
+            ORDER BY ts.y0, ts.x0
+        """, (page_num, self.HEADER_Y_MIN, self.HEADER_Y_MAX))
+
+        spans = [(row["x0"], row["x1"], row["y0"], row["text"].strip())
+                 for row in cursor.fetchall()]
+
+        if not spans:
+            logger.warning(f"No header spans found on page {page_num}, using fallback headers")
+            return self.ORIGINAL_HEADERS[:-1]  # Exclude "Page Number"
+
+        # Initialize columns with empty text lists
+        columns = [[] for _ in self.COLUMN_BOUNDARIES]
+
+        # Helper to find spanning header match
+        def find_spanning_match(y: float, center: float) -> list[int] | None:
+            for (y_approx, x_approx), col_indices in self.SPANNING_HEADERS.items():
+                if abs(y - y_approx) < 5 and abs(center - x_approx) < 20:
+                    return col_indices
+            return None
+
+        # Helper to check if header should be excluded
+        def is_excluded(y: float, center: float) -> bool:
+            for (y_approx, x_approx) in self.EXCLUDED_HEADERS:
+                if abs(y - y_approx) < 5 and abs(center - x_approx) < 20:
+                    return True
+            return False
+
+        # Assign each span to column(s)
+        for x0, x1, y, text in spans:
+            center = (x0 + x1) / 2
+
+            # Check if excluded
+            if is_excluded(y, center):
+                continue
+
+            # Check if this is a spanning header
+            span_cols = find_spanning_match(y, center)
+            if span_cols:
+                # Add to all spanned columns
+                for col_idx in span_cols:
+                    columns[col_idx].append((y, text))
+            else:
+                # Assign to single column based on center
+                for i, (col_min, col_max) in enumerate(self.COLUMN_BOUNDARIES):
+                    if col_min <= center <= col_max:
+                        columns[i].append((y, text))
+                        break
+
+        # Build header strings by joining text from top to bottom
+        headers = []
+        for col_texts in columns:
+            if col_texts:
+                # Sort by y-position (top to bottom)
+                col_texts.sort(key=lambda t: t[0])
+                header_text = " ".join(text for _, text in col_texts)
+                # Clean up: remove trailing commas, normalize spaces
+                header_text = " ".join(header_text.split()).rstrip(",")
+                headers.append(header_text)
+            else:
+                headers.append("")
+
+        logger.debug(f"Extracted {len(headers)} headers from page {page_num}")
+        return headers
+
+    def get_extracted_headers(self) -> list[str]:
+        """
+        Get headers extracted from the PDF, plus 'Page Number'.
+
+        Returns cached headers or extracts them from the database.
+        """
+        if self._extracted_headers is None:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                pdf_headers = self._extract_headers_from_db(conn)
+                # Append "Page Number" which is not in the PDF
+                self._extracted_headers = pdf_headers + ["Page Number"]
+        return self._extracted_headers
 
     def extract(self) -> ExtractionResult:
         """Run the full extraction pipeline."""
@@ -558,8 +702,9 @@ class CoreAnalysisExtractor:
 
         # Choose header style
         if use_original_headers:
-            # Sanitize original headers for CSV injection protection
-            display_headers = [sanitize_csv_value(h) for h in self.ORIGINAL_HEADERS]
+            # ISSUE #13: Use headers extracted from PDF, not hardcoded
+            # Sanitize for CSV injection protection
+            display_headers = [sanitize_csv_value(h) for h in self.get_extracted_headers()]
         else:
             display_headers = self.CANONICAL_HEADERS
 
