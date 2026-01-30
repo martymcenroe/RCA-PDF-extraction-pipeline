@@ -20,15 +20,15 @@
     "name": "Non-table pages identified",
     "status": "PASS",
     "message": "Found 249 non-table pages",
-    "evidence": "Types: {'other', 'cover', 'text', 'table', 'plot'}",
+    "evidence": "Types: {'other', 'table', 'plot', 'cover', 'text'}",
     "brief": ""
   },
   {
     "req_id": "F4",
     "name": "Extraction matches classification",
     "status": "PASS",
-    "message": "All extracted pages ({40, 41, 42, 39}) are classified as table",
-    "evidence": "Table pages: {40, 41, 42, 39}",
+    "message": "All extracted pages ([39, 40, 41, 42]) are classified as table",
+    "evidence": "Table pages: [39, 40, 41, 42]",
     "brief": ""
   },
   {
@@ -44,7 +44,7 @@
     "name": "Consolidated output exists",
     "status": "PASS",
     "message": "Both CSV and JSON outputs exist",
-    "evidence": "CSV: 8564 bytes, JSON: 69443 bytes",
+    "evidence": "CSV: 7955 bytes, JSON: 5842 bytes",
     "brief": ""
   },
   {
@@ -58,18 +58,18 @@
   {
     "req_id": "F8",
     "name": "Column headers preserved",
-    "status": "BLOCKER",
-    "message": "Headers are invented snake_case, not preserved from PDF",
-    "evidence": "Current: ['core_number', 'sample_number', 'depth_feet']...",
-    "brief": "005"
+    "status": "PASS",
+    "message": "Headers match PDF (7 patterns found)",
+    "evidence": "Found: ['Core Number', 'Sample Number', 'Sample Depth', 'Permeability', 'Porosity', 'Grain Density', 'Fluid Saturations']",
+    "brief": ""
   },
   {
     "req_id": "F9",
     "name": "Header variations handled",
-    "status": "BLOCKER",
-    "message": "Multi-row headers and page continuations not handled",
-    "evidence": "See PDF pages 39-42 - headers span multiple rows",
-    "brief": "004"
+    "status": "PASS",
+    "message": "Headers verified across pages 39, 40, 41, 42",
+    "evidence": "All table pages have matching headers",
+    "brief": ""
   },
   {
     "req_id": "Q1",
@@ -82,8 +82,8 @@
   {
     "req_id": "Q2",
     "name": "Code is clean",
-    "status": "SKIP",
-    "message": "Could not parse pylint output",
+    "status": "PASS",
+    "message": "Pylint score: 9.31/10",
     "evidence": "",
     "brief": ""
   },
@@ -98,8 +98,8 @@
   {
     "req_id": "Q4",
     "name": "Noise handled",
-    "status": "PASS",
-    "message": "No obvious noise patterns detected",
+    "status": "WARN",
+    "message": "Possible noise in output: ['Page ']",
     "evidence": "",
     "brief": ""
   },
@@ -107,7 +107,7 @@
     "req_id": "Q5",
     "name": "Tool selection explained",
     "status": "PASS",
-    "message": "Tools mentioned: ['pymupdf', 'pdfplumber', 'tesseract', 'openai']",
+    "message": "Tools mentioned: ['pymupdf', 'tesseract', 'openai']",
     "evidence": "",
     "brief": ""
   },
@@ -116,22 +116,22 @@
     "name": "Trade-offs documented",
     "status": "PASS",
     "message": "Trade-off discussion found in README.md",
-    "evidence": "Keywords: ['trade-off', 'cost', 'latency', 'performance', 'accuracy']",
+    "evidence": "Keywords: ['trade-off', 'cost', 'performance']",
     "brief": ""
   },
   {
     "req_id": "D1",
     "name": "Source code provided",
     "status": "PASS",
-    "message": "Found 8 Python files in src/",
-    "evidence": "['core_analysis.py', 'core_analysis_minimal.py', 'main.py', 'models.py', 'page_classifier.py', 'pdf_dissector.py', 'table_extractor.py', '__init__.py']",
+    "message": "Found 7 Python files in src/",
+    "evidence": "['core_analysis.py', 'main.py', 'models.py', 'page_classifier.py', 'pdf_dissector.py', 'table_extractor.py', '__init__.py']",
     "brief": ""
   },
   {
     "req_id": "D2",
     "name": "README exists",
     "status": "PASS",
-    "message": "README.md exists (3304 bytes)",
+    "message": "README.md exists (3993 bytes)",
     "evidence": "",
     "brief": ""
   },
