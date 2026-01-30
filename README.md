@@ -49,20 +49,25 @@ Core Number,Sample Number,Sample Depth feet,Permeability millidarcys to Air,Perm
 
 ---
 
-## Tool Selection & Trade-offs
+## Why Not OCR?
 
-| Tool | Why Chosen | Alternative | Trade-off |
-|------|------------|-------------|-----------|
-| **PyMuPDF** | Fast C library, extracts text + positions | pdfplumber, PyPDF2 | AGPL license |
-| **Text extraction** | PDF has embedded text (not scanned) | OCR (Tesseract, Vision API) | Won't work on scanned PDFs |
+This PDF has **embedded text** (not scanned images), so OCR would be overkill:
 
-**Cost/Latency:**
+| Approach | Time | Cost | Result |
+|----------|------|------|--------|
+| **Text extraction** (used) | 371 ms | $0 | Works perfectly |
+| Tesseract OCR | ~30 s | $0 | 80x slower, same result |
+| OpenAI Vision | ~10 s | ~$0.50/doc | Costs money, same result |
 
-| Approach | Time | Cost | When to Use |
-|----------|------|------|-------------|
-| Text extraction (used) | 371 ms | $0 | Embedded text PDFs |
-| Tesseract OCR | ~30 s | $0 | Scanned PDFs, no budget |
-| OpenAI Vision | ~10 s | ~$0.50/doc | Scanned PDFs, need accuracy |
+OCR is for scanned documents where text isn't selectable. Always check if you can just extract the text first.
+
+**Problems we avoid by not using OCR:**
+- Misread characters (0 vs O, 1 vs l, 5 vs S)
+- Small text illegibility (footnotes, subscripts)
+- Scan artifacts from dirty glass or paper creases
+- Confidence thresholds and error handling
+
+**Library:** PyMuPDF - fast C library, extracts text with positions. Trade-off: AGPL license.
 
 ---
 
