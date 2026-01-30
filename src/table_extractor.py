@@ -1,6 +1,7 @@
 """Table extraction module using pdfplumber for structured data extraction."""
 
 import json
+import re
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Optional
@@ -9,6 +10,7 @@ import pandas as pd
 import pdfplumber
 
 from .models import ExtractedTable, ExtractionResult
+from .output.csv_sanitizer import write_csv_with_bom
 
 
 class TableExtractor:
@@ -83,6 +85,7 @@ class TableExtractor:
                         page_number=page_num,
                         table_index=idx,
                         headers=headers,
+                        original_headers=headers.copy(),  # Preserve original for CSV output
                         rows=rows,
                     ))
 
@@ -106,6 +109,7 @@ class TableExtractor:
                             page_number=page_num,
                             table_index=idx,
                             headers=headers,
+                            original_headers=headers.copy(),  # Preserve original for CSV output
                             rows=rows,
                             confidence=0.7,  # Lower confidence for fallback method
                         ))
@@ -130,30 +134,41 @@ class TableExtractor:
         return cleaned
 
     def _consolidate_tables(self, result: ExtractionResult) -> None:
-        """Consolidate tables with similar headers into a single dataset."""
+        """Consolidate tables with similar headers into a single dataset.
+
+        CRITICAL: Maintains alignment between original_headers, consolidated_headers,
+        and all rows. The invariant len(headers) == len(row) must hold for all rows.
+        """
         if not result.tables:
             return
 
         # Group tables by similar headers
-        header_groups: list[tuple[list[str], list[ExtractedTable]]] = []
+        header_groups: list[tuple[list[str], list[str], list[ExtractedTable]]] = []
+        # Each group is (canonical_headers, original_headers, [tables])
 
         for table in result.tables:
             matched = False
-            for canonical_headers, group in header_groups:
+            for i, (canonical_headers, orig_headers, group) in enumerate(header_groups):
                 if self._headers_match(canonical_headers, table.headers):
                     group.append(table)
                     matched = True
                     break
 
             if not matched:
-                header_groups.append((table.headers, [table]))
+                # Start new group with this table's headers
+                header_groups.append((
+                    table.headers,
+                    table.original_headers if table.original_headers else table.headers.copy(),
+                    [table]
+                ))
 
         # Use the largest group as the consolidated output
         if header_groups:
-            largest_group = max(header_groups, key=lambda g: sum(t.row_count for t in g[1]))
+            largest_group = max(header_groups, key=lambda g: sum(t.row_count for t in g[2]))
             result.consolidated_headers = largest_group[0]
+            result.original_headers = largest_group[1]
 
-            for table in largest_group[1]:
+            for table in largest_group[2]:
                 # Align rows to canonical headers
                 aligned_rows = self._align_rows(
                     table.headers,
@@ -161,6 +176,17 @@ class TableExtractor:
                     result.consolidated_headers,
                 )
                 result.consolidated_rows.extend(aligned_rows)
+
+            # ALIGNMENT INVARIANT CHECK
+            assert len(result.consolidated_headers) == len(result.original_headers), (
+                f"Header alignment broken: {len(result.consolidated_headers)} canonical "
+                f"vs {len(result.original_headers)} original"
+            )
+            for i, row in enumerate(result.consolidated_rows):
+                assert len(row) == len(result.consolidated_headers), (
+                    f"Row {i} has {len(row)} columns but headers have "
+                    f"{len(result.consolidated_headers)}"
+                )
 
     def _headers_match(self, headers1: list[str], headers2: list[str]) -> bool:
         """Check if two header lists are similar enough to consolidate."""
@@ -222,12 +248,40 @@ class TableExtractor:
             columns=result.consolidated_headers,
         )
 
-    def save_csv(self, result: ExtractionResult, output_path: str) -> str:
-        """Save extraction result to CSV file."""
-        df = self.to_dataframe(result)
+    def save_csv(
+        self,
+        result: ExtractionResult,
+        output_path: str,
+        use_original_headers: bool = True,
+    ) -> str:
+        """Save extraction result to CSV file.
+
+        Args:
+            result: The extraction result to save.
+            output_path: Path to save the CSV file.
+            use_original_headers: If True, use original PDF headers (with sanitization).
+                                  If False, use canonical headers.
+
+        Returns:
+            The path to the saved file.
+        """
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(output_path, index=False)
+
+        # Choose headers based on preference
+        if use_original_headers and result.original_headers:
+            headers = result.original_headers
+        else:
+            headers = result.consolidated_headers
+
+        # Use the new CSV writer with BOM and sanitization
+        write_csv_with_bom(
+            rows=result.consolidated_rows,
+            output_path=str(output_path),
+            headers=headers,
+            sanitize_headers=True,
+        )
+
         return str(output_path)
 
     def save_json(self, result: ExtractionResult, output_path: str) -> str:
@@ -242,12 +296,14 @@ class TableExtractor:
             "total_tables": len(result.tables),
             "total_rows": len(result.consolidated_rows),
             "headers": result.consolidated_headers,
+            "original_headers": result.original_headers,
             "data": result.consolidated_rows,
             "tables_by_page": [
                 {
                     "page": t.page_number,
                     "table_index": t.table_index,
                     "headers": t.headers,
+                    "original_headers": t.original_headers,
                     "row_count": t.row_count,
                     "confidence": t.confidence,
                 }
