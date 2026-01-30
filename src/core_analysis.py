@@ -1000,7 +1000,6 @@ class CoreAnalysisExtractor:
 
 def main():
     """CLI entry point."""
-    import sys
     import argparse
 
     parser = argparse.ArgumentParser(
