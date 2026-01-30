@@ -35,6 +35,47 @@ The pipeline is **complete and passing all requirements**:
 | **Template Learning** | Learn table structure from examples | Would generalize to new formats |
 | **Multi-Document Correlation** | Cross-reference data across reports | Useful for trend analysis |
 
+## The Bigger Vision: Global Data Ingestion
+
+The current pipeline extracts data from a single PDF. The larger vision is an **Automated Subsurface Data Ingestion Pipeline** that harvests RCA reports from global geological repositories to build a high-diversity training dataset.
+
+### Target Data Sources
+
+| Source | Region | Access | Notes |
+|--------|--------|--------|-------|
+| USGS CRC | USA | Public | Library Number lookup, bulk download |
+| NDIC | North Dakota | Subscription | Monolithic well files |
+| University Lands | Texas | Public | API number search |
+| UK NDR | UK Continental Shelf | Public | 2,000+ wells, 43GB bulk package |
+| DISKOS | Norway | Public | Volve field open dataset |
+| WAPIMS | Western Australia | Public | Basket batch download |
+| AER | Alberta, Canada | Public | Non-confidential wells |
+
+### Architecture Concept
+
+```
+┌─────────────────┐
+│ Core Controller │
+└────────┬────────┘
+         │
+    ┌────┴────┬────────┬────────┬────────┐
+    ▼         ▼        ▼        ▼        ▼
+┌───────┐ ┌──────┐ ┌─────┐ ┌──────┐ ┌─────┐
+│ USGS  │ │ NDIC │ │ NDR │ │DISKOS│ │ ... │
+│Module │ │Module│ │Module│ │Module│ │     │
+└───────┘ └──────┘ └─────┘ └──────┘ └─────┘
+```
+
+Each module handles site-specific: authentication, search logic, navigation, and download.
+
+### Deliverables
+
+- Standardized storage: `/data/raw/{source}/{region}/{well}_{API}.pdf`
+- Metadata manifest: JSON with source URL, timestamp, API, well name, formation
+- Integrity verification: file size validation
+
+*Full specification: [docs/research/Software specification - Automated Subsurface Data Ingestion Pipeline.md](../docs/research/)*
+
 ## Briefs Completed
 
 | # | Brief | Issue | Status |
