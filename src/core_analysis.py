@@ -182,9 +182,7 @@ class CoreAnalysisExtractor:
     }
 
     # Headers to exclude (misaligned or not actual column headers)
-    EXCLUDED_HEADERS = [
-        (193, 159),  # "Sample" at y=193, center=159 - not a column header
-    ]
+    EXCLUDED_HEADERS = []  # None currently - "Sample" at y=193 IS part of Depth header
 
     def __init__(self, db_path: str):
         self.db_path = Path(db_path)

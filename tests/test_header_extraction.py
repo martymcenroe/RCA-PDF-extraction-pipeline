@@ -41,9 +41,9 @@ class TestHeaderExtraction:
         assert "%" not in headers[5]
 
     def test_depth_header_correct(self, extractor):
-        """T06: Depth header is 'Depth, feet' not 'Depth (ft)'."""
+        """T06: Depth header is 'Sample Depth, feet' not 'Depth (ft)'."""
         headers = extractor.get_extracted_headers()
-        assert headers[2] == "Depth, feet"
+        assert headers[2] == "Sample Depth, feet"
 
     def test_grain_density_units(self, extractor):
         """T07: Grain Density uses 'gm/cc' not 'g/cc'."""

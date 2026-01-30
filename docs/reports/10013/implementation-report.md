@@ -46,7 +46,7 @@ EXCLUDED_HEADERS = [
 
 | Before (Hardcoded) | After (Extracted from PDF) |
 |--------------------|---------------------------|
-| Depth (ft) | Depth, feet |
+| Depth (ft) | Sample Depth, feet |
 | Permeability (md) \| Air | Permeability, millidarcys to Air |
 | Permeability (md) \| Klink | Permeability, millidarcys Klinkenberg |
 | Porosity (%) \| Ambient | Porosity, percent Ambient |
