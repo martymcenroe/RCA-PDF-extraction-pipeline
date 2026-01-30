@@ -6,7 +6,7 @@ This page documents the code quality metrics for `src/core_analysis.py`, demonst
 
 | Metric | Score | Rating |
 |--------|-------|--------|
-| **Pylint Score** | 9.26/10 | Excellent |
+| **Pylint Score** | 9.31/10 | Excellent |
 | **Cyclomatic Complexity** | B (5.5 avg) | Good |
 | **Maintainability Index** | A | Excellent |
 | **Functions/Methods** | 26 | Well-decomposed |

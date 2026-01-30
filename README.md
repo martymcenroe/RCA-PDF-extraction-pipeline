@@ -77,22 +77,23 @@ OCR is for scanned documents where text isn't selectable. Always check if you ca
 ├── data/output/
 │   ├── spec/                        ← ASSIGNMENT DELIVERABLES
 │   │   ├── full_table_extraction.csv   ← Part 2: Table extraction output
-│   │   └── page_classification.json    ← Part 1: Page classification output
+│   │   ├── page_classification.json    ← Part 1: Page classification output
+│   │   └── header_verification.txt     ← Header consistency proof
 │   └── extended/                    ← DATABASE APPROACH + VIEWER
 │       ├── W20552_elements.db       ← SQLite database (224K elements)
 │       └── W20552_images/           ← Extracted images (468 files)
 ├── src/
 │   └── core_analysis.py             ← MAIN PIPELINE
-├── tests/                           ← 18 unit tests
+├── tests/                           ← 44 unit tests
 ├── docs/wiki/                       ← Detailed documentation
-└── requirements.txt                 ← Dependencies (PyMuPDF only)
+└── requirements.txt                 ← Dependencies (PyMuPDF, Flask, Click)
 ```
 
 ---
 
 ## Documentation
 
-- [Wiki: Requirements Analysis](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Requirements) - How requirements were met
+- [Wiki: Requirements Analysis](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Assignment-Requirements) - How requirements were met
 - [Wiki: Architecture](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Architecture) - Design decisions
 - [Wiki: Performance](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Performance) - Benchmarks
 - [Wiki: Extensions](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Extensions) - Database approach & viewer
