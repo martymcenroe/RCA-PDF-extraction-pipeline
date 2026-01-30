@@ -143,12 +143,19 @@ class PDFStructure:
 
 @dataclass
 class ExtractedTable:
-    """A table extracted from a page."""
+    """A table extracted from a page.
+
+    Supports dual-header architecture:
+    - headers: Canonical names for internal code access (e.g., "permeability_air_md")
+    - original_headers: Original PDF text for CSV output (e.g., "Permeability (md) | Air")
+    """
     page_number: int
     table_index: int
-    headers: list[str]
+    headers: list[str]  # Canonical headers for code access
     rows: list[list[str]]
     confidence: float = 1.0
+    original_headers: list[str] = field(default_factory=list)  # Original PDF headers for output
+    source_header_rows: int = 1  # Number of header rows flattened
 
     @property
     def row_count(self) -> int:
@@ -161,10 +168,16 @@ class ExtractedTable:
 
 @dataclass
 class ExtractionResult:
-    """Result of table extraction from entire PDF."""
+    """Result of table extraction from entire PDF.
+
+    Supports dual-header architecture:
+    - consolidated_headers: Canonical names for internal code access
+    - original_headers: Original PDF text for CSV output
+    """
     source_file: str
     tables: list[ExtractedTable] = field(default_factory=list)
-    consolidated_headers: list[str] = field(default_factory=list)
+    consolidated_headers: list[str] = field(default_factory=list)  # Canonical headers
+    original_headers: list[str] = field(default_factory=list)  # Original PDF headers
     consolidated_rows: list[list[str]] = field(default_factory=list)
     pages_processed: int = 0
     pages_with_tables: int = 0
