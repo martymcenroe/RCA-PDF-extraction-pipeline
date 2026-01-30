@@ -20,7 +20,9 @@ def sanitize_csv_value(value: str) -> str:
         value: The string to sanitize.
 
     Returns:
-        String prefixed with single quote if it starts with formula characters.
+        String prefixed with single quote if it starts with formula characters
+        AND could be interpreted as a formula. Standalone indicators like
+        '+', '**', '<0.0001' are NOT escaped as they're not valid formulas.
 
     Example:
         >>> sanitize_csv_value("=SUM(A1)")
@@ -29,8 +31,18 @@ def sanitize_csv_value(value: str) -> str:
         'Normal Header'
         >>> sanitize_csv_value("+1234")
         "'+1234"
+        >>> sanitize_csv_value("+")
+        '+'
+        >>> sanitize_csv_value("**")
+        '**'
     """
     if not value:
+        return value
+
+    # Safe indicators that aren't valid formulas - don't escape these
+    SAFE_INDICATORS = {'+', '**', '-', '<0.0001', '<'}
+
+    if value in SAFE_INDICATORS:
         return value
 
     if value.startswith(FORMULA_CHARS):

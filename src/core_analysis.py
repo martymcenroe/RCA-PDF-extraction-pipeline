@@ -6,6 +6,8 @@ classifies pages, and consolidates table data into CSV/JSON output.
 
 import csv
 import json
+import logging
+import os
 import re
 import sqlite3
 from dataclasses import dataclass, field
@@ -14,6 +16,39 @@ from typing import Optional
 
 from .output.csv_sanitizer import sanitize_csv_value
 
+# Configure logging for audit trail
+logger = logging.getLogger(__name__)
+
+# Compiled regex for fracture indicator extraction (Tier 3 optimization)
+FRACTURE_INDICATOR_RE = re.compile(r'\((f|F)\)$')
+
+# Safety limits to prevent resource exhaustion on malformed input
+MAX_SAMPLE_LINES = 20  # Maximum lines per sample before aborting parse
+
+# Column groups for merged cell expansion
+COLUMN_GROUPS = {
+    'permeability': ['permeability_air_md', 'permeability_klink_md'],
+    'saturation': ['saturation_water_pct', 'saturation_oil_pct', 'saturation_total_pct'],
+}
+
+# Expected column counts for fail-safe validation
+EXPECTED_COLUMN_COUNTS = {
+    'permeability': 2,
+    'saturation': 3,
+}
+
+# Merged cell indicators that should be replicated across column groups
+MERGED_INDICATORS = ['+', '**', '<0.0001', '<']
+
+# Allowed output directories for security
+ALLOWED_OUTPUT_ROOTS = [
+    '/c/Users/mcwiz/Projects/RCA-PDF-extraction-pipeline',
+    '/tmp/',
+    'C:\\Users\\mcwiz\\Projects\\RCA-PDF-extraction-pipeline',
+    'C:\\Users\\mcwiz\\AppData\\Local\\Temp',  # Windows temp
+    '/c/Users/mcwiz/AppData/Local/Temp',  # Unix-style Windows temp
+]
+
 
 @dataclass
 class CoreSample:
@@ -21,16 +56,15 @@ class CoreSample:
     core_number: str
     sample_number: str
     depth_feet: Optional[float]
-    permeability_air_md: Optional[float | str]  # Can be float or "<0.0001" string
-    permeability_klink_md: Optional[float]
+    permeability_air_md: Optional[float | str]  # Can be float or merged indicator
+    permeability_klink_md: Optional[float | str]  # Can be float or merged indicator
     porosity_ambient_pct: Optional[float]
     porosity_ncs_pct: Optional[float]
     grain_density_gcc: Optional[float]
-    saturation_water_pct: Optional[float]
-    saturation_oil_pct: Optional[float]
-    saturation_total_pct: Optional[float]
+    saturation_water_pct: Optional[float | str]  # Can be float or "**"
+    saturation_oil_pct: Optional[float | str]  # Can be float or "**"
+    saturation_total_pct: Optional[float | str]  # Can be float or "**"
     page_number: int = 0
-    notes: str = ""
 
     def to_dict(self) -> dict:
         return {
@@ -46,7 +80,6 @@ class CoreSample:
             "saturation_oil_pct": self.saturation_oil_pct,
             "saturation_total_pct": self.saturation_total_pct,
             "page_number": self.page_number,
-            "notes": self.notes,
         }
 
 
@@ -78,7 +111,7 @@ class CoreAnalysisExtractor:
         "porosity_ambient_pct", "porosity_ncs_pct",
         "grain_density_gcc",
         "saturation_water_pct", "saturation_oil_pct", "saturation_total_pct",
-        "page_number", "notes"
+        "page_number"
     ]
 
     # Original PDF headers (matching the actual table headers in the PDF)
@@ -89,7 +122,7 @@ class CoreAnalysisExtractor:
         "Grain Density (g/cc)",
         "Fluid Saturations (%) | Water", "Fluid Saturations (%) | Oil",
         "Fluid Saturations (%) | Total",
-        "Page Number", "Notes"
+        "Page Number"
     ]
 
     # Keywords for classification
@@ -300,8 +333,19 @@ class CoreAnalysisExtractor:
         return samples
 
     def _parse_sample_lines(self, lines: list[str], page_num: int) -> Optional[CoreSample]:
-        """Parse a sample's lines into a CoreSample object."""
+        """Parse a sample's lines into a CoreSample object.
+
+        Issue #4 changes:
+        1. Replicate merged indicators (+, <0.0001) to both permeability columns
+        2. Replicate ** to all three saturation columns
+        3. Fix + handling: means "below detection", not "fracture"
+        """
         try:
+            # SAFETY: Prevent unbounded loop on malformed input
+            if len(lines) > MAX_SAMPLE_LINES:
+                logger.warning(f"Page {page_num}: Sample exceeds {MAX_SAMPLE_LINES} lines, skipping")
+                return None
+
             if len(lines) < 5:
                 return None
 
@@ -323,7 +367,6 @@ class CoreAnalysisExtractor:
             sat_water = None
             sat_oil = None
             sat_total = None
-            notes = ""
 
             idx = 0
 
@@ -331,9 +374,12 @@ class CoreAnalysisExtractor:
             if idx < len(values):
                 val = values[idx]
                 if val == '+':
-                    notes += "fracture"
+                    # ISSUE #4 FIX: + means "below detection", replicate to BOTH columns
+                    perm_air = '+'
+                    perm_klink = '+'
+                    logger.debug(f"Expanded '+' to both permeability columns")
                     idx += 1
-                    # For fractures, skip to porosity (single value)
+                    # For + values, skip to porosity (single value for these samples)
                     if idx < len(values):
                         porosity_amb = self._parse_float(values[idx])
                         idx += 1
@@ -342,21 +388,15 @@ class CoreAnalysisExtractor:
                         grain_density = self._parse_float(values[idx])
                         idx += 1
                 elif val.startswith('<'):
-                    perm_air = val  # Preserve original string like "<0.0001"
-                    notes += f"perm{val}"
+                    # ISSUE #4 FIX: Replicate to BOTH permeability columns
+                    perm_air = val
+                    perm_klink = val  # Replicate to klink
+                    logger.debug(f"Expanded '{val}' to both permeability columns")
                     idx += 1
-                    # For <X values, may or may not have klinkenberg
-                    # Check if next value looks like a small decimal (klinkenberg)
-                    # or a porosity value (larger)
+                    # For <X values, skip klinkenberg (it's merged), go to porosity
                     if idx < len(values):
-                        next_val = self._parse_float(values[idx])
-                        if next_val is not None and next_val < 1:
-                            # Likely no klinkenberg, this is porosity
-                            porosity_amb = next_val
-                            idx += 1
-                        else:
-                            porosity_amb = next_val
-                            idx += 1
+                        porosity_amb = self._parse_float(values[idx])
+                        idx += 1
                     if idx < len(values):
                         porosity_ncs = self._parse_float(values[idx])
                         idx += 1
@@ -392,7 +432,11 @@ class CoreAnalysisExtractor:
             if idx < len(values):
                 val = values[idx]
                 if val == '**':
-                    notes = (notes + "; no_saturations").strip("; ")
+                    # ISSUE #4 FIX: Replicate ** to ALL THREE saturation columns
+                    sat_water = '**'
+                    sat_oil = '**'
+                    sat_total = '**'
+                    logger.debug("Expanded '**' to all saturation columns")
                 else:
                     sat_water = self._parse_float(val)
                     idx += 1
@@ -417,7 +461,6 @@ class CoreAnalysisExtractor:
                 saturation_oil_pct=sat_oil,
                 saturation_total_pct=sat_total,
                 page_number=page_num,
-                notes=notes,
             )
 
         except Exception:
@@ -441,6 +484,43 @@ class CoreAnalysisExtractor:
             return float(cleaned)
         except ValueError:
             return None
+
+    def _extract_fracture_indicator(self, sample_number: str) -> Optional[str]:
+        """Extract case-sensitive fracture indicator from sample number.
+
+        Args:
+            sample_number: Sample number like "1-9(f)" or "1-2(F)"
+
+        Returns:
+            "(f)" or "(F)" if present, None otherwise.
+        """
+        # Strip whitespace to handle PDF extraction artifacts
+        sample_clean = sample_number.strip()
+        match = FRACTURE_INDICATOR_RE.search(sample_clean)
+        if match:
+            indicator = f"({match.group(1)})"
+            logger.debug(f"Extracted fracture indicator: {indicator} from {sample_number}")
+            return indicator
+        return None
+
+    def _validate_output_path(self, output_path: str) -> bool:
+        """Ensure output path is within allowed directories.
+
+        Args:
+            output_path: Path to validate
+
+        Returns:
+            True if valid
+
+        Raises:
+            ValueError: If path is outside allowed directories
+        """
+        abs_path = os.path.abspath(output_path)
+        for allowed_root in ALLOWED_OUTPUT_ROOTS:
+            allowed_abs = os.path.abspath(allowed_root)
+            if abs_path.startswith(allowed_abs):
+                return True
+        raise ValueError(f"Output path '{output_path}' outside allowed directories")
 
     def get_classification_dict(self, result: ExtractionResult) -> dict[str, str]:
         """Get classification as a simple dictionary for the assignment."""
@@ -466,7 +546,13 @@ class CoreAnalysisExtractor:
 
         Returns:
             Path to saved file.
+
+        Raises:
+            ValueError: If output_path is outside allowed directories.
         """
+        # ISSUE #4: Validate output path for security
+        self._validate_output_path(str(output_path))
+
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -476,6 +562,16 @@ class CoreAnalysisExtractor:
             display_headers = [sanitize_csv_value(h) for h in self.ORIGINAL_HEADERS]
         else:
             display_headers = self.CANONICAL_HEADERS
+
+        # Helper to format and sanitize cell values
+        def format_value(val):
+            if val is None:
+                return ""
+            # ISSUE #4: Sanitize string values that may contain CSV injection chars
+            # This handles replicated merged indicators like +, **, <0.0001
+            if isinstance(val, str):
+                return sanitize_csv_value(val)
+            return val
 
         # Write with UTF-8 BOM for Excel compatibility
         with open(output_path, 'w', newline='', encoding='utf-8-sig') as f:
@@ -488,23 +584,29 @@ class CoreAnalysisExtractor:
                     sample.core_number,
                     sample.sample_number,
                     sample.depth_feet if sample.depth_feet is not None else "",
-                    sample.permeability_air_md if sample.permeability_air_md is not None else "",
-                    sample.permeability_klink_md if sample.permeability_klink_md is not None else "",
+                    format_value(sample.permeability_air_md),
+                    format_value(sample.permeability_klink_md),
                     sample.porosity_ambient_pct if sample.porosity_ambient_pct is not None else "",
                     sample.porosity_ncs_pct if sample.porosity_ncs_pct is not None else "",
                     sample.grain_density_gcc if sample.grain_density_gcc is not None else "",
-                    sample.saturation_water_pct if sample.saturation_water_pct is not None else "",
-                    sample.saturation_oil_pct if sample.saturation_oil_pct is not None else "",
-                    sample.saturation_total_pct if sample.saturation_total_pct is not None else "",
+                    format_value(sample.saturation_water_pct),
+                    format_value(sample.saturation_oil_pct),
+                    format_value(sample.saturation_total_pct),
                     sample.page_number,
-                    sample.notes,
                 ]
                 writer.writerow(row)
 
         return str(output_path)
 
     def save_json(self, result: ExtractionResult, output_path: str) -> str:
-        """Save extraction result to JSON."""
+        """Save extraction result to JSON.
+
+        Raises:
+            ValueError: If output_path is outside allowed directories.
+        """
+        # ISSUE #4: Validate output path for security
+        self._validate_output_path(str(output_path))
+
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
