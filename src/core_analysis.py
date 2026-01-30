@@ -11,6 +11,7 @@ import os
 import re
 import sqlite3
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -292,6 +293,108 @@ class CoreAnalysisExtractor:
                 # Append "Page Number" which is not in the PDF
                 self._extracted_headers = pdf_headers + ["Page Number"]
         return self._extracted_headers
+
+    def verify_headers_across_pages(
+        self, table_pages: list[int] | None = None
+    ) -> dict:
+        """
+        Verify headers are consistent across all table pages.
+
+        Extracts headers from each table page and compares them to ensure
+        consistency. This addresses the assignment requirement to "handle
+        any potential header variations across pages."
+
+        Args:
+            table_pages: List of table page numbers to check. If None, will
+                        run extraction to discover table pages.
+
+        Returns:
+            dict with keys:
+            - 'verified': bool - True if all pages match
+            - 'reference_page': int - Page used as reference (first table page)
+            - 'reference_headers': list[str] - Headers from reference page
+            - 'pages_checked': list[int] - All pages that were checked
+            - 'mismatches': list[dict] - Details of any mismatches found
+                Each mismatch has: page, differences (list of diffs)
+        """
+        if table_pages is None:
+            # Run extraction to get table pages
+            result = self.extract()
+            table_pages = result.table_pages
+
+        if not table_pages:
+            return {
+                'verified': False,
+                'reference_page': None,
+                'reference_headers': [],
+                'pages_checked': [],
+                'mismatches': [],
+            }
+
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+
+            # Extract headers from each table page
+            headers_by_page: dict[int, list[str]] = {}
+            for page_num in table_pages:
+                headers_by_page[page_num] = self._extract_headers_from_db(
+                    conn, page_num
+                )
+
+        # Use first table page as reference
+        reference_page = table_pages[0]
+        reference_headers = headers_by_page[reference_page]
+
+        # Compare all pages to reference
+        mismatches = []
+        for page_num in table_pages[1:]:
+            page_headers = headers_by_page[page_num]
+            differences = []
+
+            # Check header count
+            if len(page_headers) != len(reference_headers):
+                differences.append(
+                    f"Column count differs: {len(page_headers)} vs "
+                    f"{len(reference_headers)} (reference)"
+                )
+
+            # Check each header
+            for i, (ref_h, page_h) in enumerate(
+                zip(reference_headers, page_headers)
+            ):
+                if ref_h != page_h:
+                    differences.append(
+                        f"Column {i}: '{page_h}' vs '{ref_h}' (reference)"
+                    )
+
+            if differences:
+                mismatches.append({
+                    'page': page_num,
+                    'differences': differences,
+                })
+                logger.warning(
+                    f"Header mismatch on page {page_num}: {differences}"
+                )
+
+        verified = len(mismatches) == 0
+
+        if verified:
+            logger.info(
+                f"Headers verified: all {len(table_pages)} pages match"
+            )
+        else:
+            logger.warning(
+                f"Header verification failed: {len(mismatches)} pages "
+                "have different headers"
+            )
+
+        return {
+            'verified': verified,
+            'reference_page': reference_page,
+            'reference_headers': reference_headers,
+            'pages_checked': table_pages,
+            'mismatches': mismatches,
+        }
 
     def extract(self) -> ExtractionResult:
         """Run the full extraction pipeline."""
@@ -763,6 +866,82 @@ class CoreAnalysisExtractor:
 
         return str(output_path)
 
+    def save_header_verification(
+        self,
+        output_path: str,
+        table_pages: list[int] | None = None,
+    ) -> str:
+        """
+        Verify headers across table pages and save results to a text file.
+
+        This addresses the assignment requirement to "handle any potential
+        header variations across pages" by verifying all table pages have
+        consistent headers.
+
+        Args:
+            output_path: Path to save the verification report.
+            table_pages: List of table page numbers. If None, will discover
+                        them via extraction.
+
+        Returns:
+            Path to saved file.
+
+        Raises:
+            ValueError: If output_path is outside allowed directories.
+        """
+        self._validate_output_path(str(output_path))
+
+        # Run header verification
+        verification = self.verify_headers_across_pages(table_pages)
+
+        # Format as human-readable report
+        lines = [
+            "Header Verification Report",
+            "=" * 26,
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            "",
+        ]
+
+        if verification['reference_page'] is not None:
+            lines.append(f"Reference Page: {verification['reference_page']}")
+            pages_str = ", ".join(str(p) for p in verification['pages_checked'])
+            lines.append(f"Pages Checked: {pages_str}")
+            lines.append("")
+
+            if verification['verified']:
+                lines.append(
+                    "Status: VERIFIED - All headers match across pages"
+                )
+            else:
+                lines.append(
+                    f"Status: MISMATCH - {len(verification['mismatches'])} "
+                    "page(s) have different headers"
+                )
+                lines.append("")
+                lines.append("Mismatches:")
+                for mismatch in verification['mismatches']:
+                    lines.append(f"  Page {mismatch['page']}:")
+                    for diff in mismatch['differences']:
+                        lines.append(f"    - {diff}")
+
+            lines.append("")
+            lines.append(f"Headers ({len(verification['reference_headers'])} columns):")
+            for i, header in enumerate(verification['reference_headers'], 1):
+                lines.append(f"  {i}. {header}")
+        else:
+            lines.append("Status: NO TABLE PAGES FOUND")
+            lines.append("")
+            lines.append("No table pages were identified in the document.")
+
+        # Write to file
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write("\n".join(lines))
+
+        return str(output_path)
+
     def save_json(self, result: ExtractionResult, output_path: str) -> str:
         """Save extraction result to JSON (legacy bundled format).
 
@@ -871,10 +1050,16 @@ def main():
             result,
             f"{args.output}/page_classification.json"
         )
+        # Issue #16: Header verification across table pages
+        verification_path = extractor.save_header_verification(
+            f"{args.output}/header_verification.txt",
+            table_pages=result.table_pages,
+        )
 
         print(f"\nOutput files:")
         print(f"  Page Classification (Part 1): {classification_path}")
         print(f"  Full Table Extraction (Part 2): {csv_path}")
+        print(f"  Header Verification: {verification_path}")
 
 
 if __name__ == "__main__":
