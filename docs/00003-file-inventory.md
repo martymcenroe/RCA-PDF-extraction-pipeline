@@ -1,4 +1,4 @@
-# 00003 - demo-004-invoice File Inventory
+# 00003 - RCA-PDF-extraction-pipeline File Inventory
 
 **Status:** Active
 **Created:** 2026-01-29
@@ -8,14 +8,14 @@
 
 ## Purpose
 
-This document provides a complete inventory of files in the demo-004-invoice project, organized by directory. It serves as a quick reference for agents and developers to understand the project structure.
+This document provides a complete inventory of files in the RCA-PDF-extraction-pipeline project, organized by directory. It serves as a quick reference for agents and developers to understand the project structure.
 
 ---
 
 ## Directory Structure
 
 ```
-demo-004-invoice/
+RCA-PDF-extraction-pipeline/
 ├── .claude/                    # Claude Code configuration
 ├── data/                       # App data: examples, templates, seeds
 ├── docs/                       # All documentation
