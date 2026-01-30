@@ -76,20 +76,14 @@ Extracted 138 samples with the following schema:
 
 | Requirement | Status | Location |
 |-------------|--------|----------|
-| Page classification dict | ✅ | `core_analysis_minimal.json` |
-| Consolidated CSV | ✅ | `core_analysis_minimal.csv` |
-| Consolidated JSON | ✅ | `core_analysis_minimal.json` |
-| Source code | ✅ | `src/core_analysis_minimal.py` |
+| Page classification dict | ✅ | `page_classification.json` |
+| Consolidated CSV | ✅ | `full_table_extraction.csv` |
+| Source code | ✅ | `src/core_analysis.py` |
 | Documentation | ✅ | `README.md`, `docs/wiki/` |
 
-## "Small Pipeline" Criteria
-
-The assignment requested a "small pipeline". The minimal solution meets this:
+## Pipeline Criteria
 
 | Metric | Value | Assessment |
 |--------|-------|------------|
-| Source files | 1 | Single file solution |
-| Lines of code | ~200 | Minimal |
 | Dependencies | 1 (PyMuPDF) | Minimal |
 | Processing time | 359 ms | Fast |
-| Commands to run | 2 | `pip install` + `python script` |

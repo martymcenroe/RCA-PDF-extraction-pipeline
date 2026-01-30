@@ -24,7 +24,7 @@ dev = [
 ]
 
 [project.scripts]
-core-analysis = "src.core_analysis_minimal:main"
+core-analysis = "src.core_analysis:main"
 
 [build-system]
 requires = ["poetry-core"]

@@ -741,8 +741,32 @@ class CoreAnalysisExtractor:
 
         return str(output_path)
 
+    def save_classification(self, result: ExtractionResult, output_path: str) -> str:
+        """Save page classification to JSON (Part 1 of assignment).
+
+        Outputs a flat dictionary: {"page_1": "other", "page_39": "table", ...}
+
+        Raises:
+            ValueError: If output_path is outside allowed directories.
+        """
+        # LLD-015: Validate output path for security
+        self._validate_output_path(str(output_path))
+
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Output flat classification dict only (not nested)
+        data = self.get_classification_dict(result)
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+
+        return str(output_path)
+
     def save_json(self, result: ExtractionResult, output_path: str) -> str:
-        """Save extraction result to JSON.
+        """Save extraction result to JSON (legacy bundled format).
+
+        Note: For assignment deliverables, use save_classification() instead.
 
         Raises:
             ValueError: If output_path is outside allowed directories.
@@ -837,16 +861,20 @@ def main():
     extractor.print_summary(result)
 
     if not args.classify_only:
+        # LLD-015: New output filenames matching assignment terminology
         csv_path = extractor.save_csv(
             result,
-            f"{args.output}/core_analysis.csv",
+            f"{args.output}/full_table_extraction.csv",
             use_original_headers=args.original_headers,
         )
-        json_path = extractor.save_json(result, f"{args.output}/core_analysis.json")
+        classification_path = extractor.save_classification(
+            result,
+            f"{args.output}/page_classification.json"
+        )
 
         print(f"\nOutput files:")
-        print(f"  CSV: {csv_path}")
-        print(f"  JSON: {json_path}")
+        print(f"  Page Classification (Part 1): {classification_path}")
+        print(f"  Full Table Extraction (Part 2): {csv_path}")
 
 
 if __name__ == "__main__":
