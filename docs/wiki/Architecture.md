@@ -11,11 +11,10 @@ Two solutions were implemented:
 
 ## Minimal Approach (Recommended for Grading)
 
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  PDF Input  │────▶│   PyMuPDF    │────▶│  CSV/JSON   │
-│             │     │  (359 ms)    │     │  (output)   │
-└─────────────┘     └──────────────┘     └─────────────┘
+```mermaid
+flowchart LR
+    A[PDF Input] --> B[PyMuPDF<br/>359 ms]
+    B --> C[CSV/JSON<br/>output]
 ```
 
 **Advantages:**
@@ -31,16 +30,12 @@ Two solutions were implemented:
 
 ## Database Approach (Development)
 
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  PDF Input  │────▶│  Elementizer │────▶│  SQLite DB  │
-│             │     │  (5.4 sec)   │     │  (32 MB)    │
-└─────────────┘     └──────────────┘     └──────┬──────┘
-                                                │
-┌─────────────┐     ┌──────────────┐            │
-│  CSV/JSON   │◀────│  Extractor   │◀───────────┘
-│  (output)   │     │  (56 ms)     │
-└─────────────┘     └──────────────┘
+```mermaid
+flowchart LR
+    A[PDF Input] --> B[Elementizer<br/>5.4 sec]
+    B --> C[(SQLite DB<br/>32 MB)]
+    C --> D[Extractor<br/>56 ms]
+    D --> E[CSV/JSON<br/>output]
 ```
 
 **Advantages:**
@@ -108,17 +103,16 @@ Two solutions were implemented:
 
 PyMuPDF extracts text vertically (column-by-column), not row-by-row:
 
-```
-Raw extraction:          Logical structure:
-1                        1  1-1  9,580.50  0.0011  ...
-1-1                      1  1-2  9,581.50  +       ...
-9,580.50
-0.0011
-...
-1
-1-2
-9,581.50
-+
+```mermaid
+flowchart LR
+    subgraph Raw["Raw Extraction (vertical)"]
+        R1["1<br/>1-1<br/>9,580.50<br/>0.0011<br/>...<br/>1<br/>1-2<br/>9,581.50"]
+    end
+    subgraph Logical["Logical Structure (rows)"]
+        L1["1 | 1-1 | 9,580.50 | 0.0011 | ..."]
+        L2["1 | 1-2 | 9,581.50 | + | ..."]
+    end
+    Raw -->|"boundary<br/>detection"| Logical
 ```
 
 **Solution:** Find sample boundaries by detecting the pattern:
