@@ -8,7 +8,7 @@ A Python pipeline for extracting structured data from Routine Core Analysis (RCA
 |------|-------------|
 | [[Assignment-Requirements]] | Audit results and deliverables |
 | [[Architecture]] | Design decisions and trade-offs |
-| [[Clean-Code]] | Pylint score: 9.31/10 |
+| [[Code-Quality]] | Pylint 9.31/10, Maintainability A |
 | [[Security]] | Bandit scan, CSV injection protection |
 | [[Performance]] | Benchmarks and scalability analysis |
 | [[Extensions]] | Database approach and web viewer |
@@ -34,7 +34,7 @@ poetry run python -m src.core_analysis data/output/extended/W20552_elements.db -
 
 ```bash
 poetry install
-core-analysis docs/context/init/W20552.pdf --output data/output/
+core-analysis data/output/extended/W20552_elements.db --output data/output/spec/ --original-headers
 ```
 
 ## Output
