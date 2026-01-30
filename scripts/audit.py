@@ -247,7 +247,7 @@ def check_f9_header_variations() -> CheckResult:
 
 def check_q1_code_modular() -> CheckResult:
     """Q1: Code is modular."""
-    src_path = PROJECT_ROOT / "src/core_analysis_minimal.py"
+    src_path = PROJECT_ROOT / "src/core_analysis.py"
 
     try:
         with open(src_path, encoding="utf-8") as f:
@@ -272,39 +272,75 @@ def check_q1_code_modular() -> CheckResult:
 
 def check_q2_code_clean() -> CheckResult:
     """Q2: Code is clean (pylint score)."""
-    src_path = PROJECT_ROOT / "src/core_analysis_minimal.py"
+    src_path = PROJECT_ROOT / "src/core_analysis.py"
+
+    # First check if pylint is installed
+    try:
+        version_result = subprocess.run(
+            ["python", "-m", "pylint", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if version_result.returncode != 0:
+            return CheckResult("Q2", "Code is clean", "SKIP",
+                               "pylint not installed - run: pip install pylint")
+    except FileNotFoundError:
+        return CheckResult("Q2", "Code is clean", "SKIP",
+                           "pylint not installed - run: pip install pylint")
+    except subprocess.TimeoutExpired:
+        return CheckResult("Q2", "Code is clean", "SKIP",
+                           "pylint version check timed out")
+
+    # Check source file exists
+    if not src_path.exists():
+        return CheckResult("Q2", "Code is clean", "SKIP",
+                           f"Source file not found: {src_path}")
 
     try:
+        # Run pylint with extended timeout
+        # Note: pylint returns non-zero exit codes for any warnings/errors found
+        # so we cannot rely on returncode for success
         result = subprocess.run(
             ["python", "-m", "pylint", str(src_path), "--score=y", "--output-format=text"],
             capture_output=True,
             text=True,
-            timeout=60
+            timeout=120,
+            encoding="utf-8",
+            errors="replace",
         )
 
-        # Extract score from output
-        score_match = re.search(r'Your code has been rated at ([\d.]+)/10', result.stdout)
+        # Combine stdout and stderr for parsing (score can appear in either)
+        combined_output = result.stdout + "\n" + result.stderr
+
+        # Extract score - handle negative scores (pylint can return negative values)
+        score_match = re.search(r'Your code has been rated at (-?[\d.]+)/10', combined_output)
 
         if score_match:
             score = float(score_match.group(1))
-            if score >= 7.0:
+            if score >= 8.0:
                 return CheckResult("Q2", "Code is clean", "PASS",
                                    f"Pylint score: {score}/10")
-            elif score >= 5.0:
+            elif score >= 6.0:
                 return CheckResult("Q2", "Code is clean", "WARN",
-                                   f"Pylint score: {score}/10 (target: 7.0)")
+                                   f"Pylint score: {score}/10 (target: 8.0)")
             else:
                 return CheckResult("Q2", "Code is clean", "FAIL",
-                                   f"Pylint score: {score}/10 (target: 7.0)")
+                                   f"Pylint score: {score}/10 (target: 8.0)")
         else:
+            # Parse failure - provide debug evidence
+            evidence = f"stdout: {result.stdout[:100]}... stderr: {result.stderr[:100]}..."
             return CheckResult("Q2", "Code is clean", "SKIP",
                                "Could not parse pylint output",
-                               evidence=result.stdout[:200])
-    except FileNotFoundError:
+                               evidence=evidence)
+    except subprocess.TimeoutExpired:
         return CheckResult("Q2", "Code is clean", "SKIP",
-                           "pylint not installed")
+                           "pylint timed out after 120s")
     except Exception as e:
-        return CheckResult("Q2", "Code is clean", "SKIP", str(e))
+        return CheckResult("Q2", "Code is clean", "SKIP",
+                           f"{type(e).__name__}: {e}")
 
 
 def check_q3_loops_efficiently() -> CheckResult:
