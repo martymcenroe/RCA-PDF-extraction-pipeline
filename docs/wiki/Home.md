@@ -8,6 +8,7 @@ A Python pipeline for extracting structured data from Routine Core Analysis (RCA
 |------|-------------|
 | [[Requirements]] | Assignment requirements and deliverables |
 | [[Architecture]] | Design decisions and trade-offs |
+| [[Code-Quality]] | Modularity metrics and analysis |
 | [[Performance]] | Benchmarks and scalability analysis |
 | [[Extensions]] | Database approach and web viewer |
 
