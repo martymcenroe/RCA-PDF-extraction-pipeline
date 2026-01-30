@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from .output.csv_sanitizer import sanitize_csv_value
+
 
 @dataclass
 class CoreSample:
@@ -19,7 +21,7 @@ class CoreSample:
     core_number: str
     sample_number: str
     depth_feet: Optional[float]
-    permeability_air_md: Optional[float]
+    permeability_air_md: Optional[float | str]  # Can be float or "<0.0001" string
     permeability_klink_md: Optional[float]
     porosity_ambient_pct: Optional[float]
     porosity_ncs_pct: Optional[float]
@@ -68,6 +70,27 @@ class ExtractionResult:
 
 class CoreAnalysisExtractor:
     """Extract Core Analysis data from parsed PDF database."""
+
+    # Canonical headers (for internal use and backwards compatibility)
+    CANONICAL_HEADERS = [
+        "core_number", "sample_number", "depth_feet",
+        "permeability_air_md", "permeability_klink_md",
+        "porosity_ambient_pct", "porosity_ncs_pct",
+        "grain_density_gcc",
+        "saturation_water_pct", "saturation_oil_pct", "saturation_total_pct",
+        "page_number", "notes"
+    ]
+
+    # Original PDF headers (matching the actual table headers in the PDF)
+    ORIGINAL_HEADERS = [
+        "Core Number", "Sample Number", "Depth (ft)",
+        "Permeability (md) | Air", "Permeability (md) | Klink",
+        "Porosity (%) | Ambient", "Porosity (%) | NCS",
+        "Grain Density (g/cc)",
+        "Fluid Saturations (%) | Water", "Fluid Saturations (%) | Oil",
+        "Fluid Saturations (%) | Total",
+        "Page Number", "Notes"
+    ]
 
     # Keywords for classification
     TABLE_KEYWORDS = [
@@ -319,8 +342,8 @@ class CoreAnalysisExtractor:
                         grain_density = self._parse_float(values[idx])
                         idx += 1
                 elif val.startswith('<'):
-                    perm_air = 0.0  # Below detection limit
-                    notes += f"perm<{val[1:]}"
+                    perm_air = val  # Preserve original string like "<0.0001"
+                    notes += f"perm{val}"
                     idx += 1
                     # For <X values, may or may not have klinkenberg
                     # Check if next value looks like a small decimal (klinkenberg)
@@ -426,25 +449,57 @@ class CoreAnalysisExtractor:
             for c in result.classifications
         }
 
-    def save_csv(self, result: ExtractionResult, output_path: str) -> str:
-        """Save extracted samples to CSV."""
+    def save_csv(
+        self,
+        result: ExtractionResult,
+        output_path: str,
+        use_original_headers: bool = False,
+    ) -> str:
+        """Save extracted samples to CSV.
+
+        Args:
+            result: Extraction result containing samples.
+            output_path: Path to save CSV file.
+            use_original_headers: If True, use original PDF headers (e.g., "Depth (ft)")
+                                  instead of canonical headers (e.g., "depth_feet").
+                                  Original headers are sanitized for CSV injection protection.
+
+        Returns:
+            Path to saved file.
+        """
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        headers = [
-            "core_number", "sample_number", "depth_feet",
-            "permeability_air_md", "permeability_klink_md",
-            "porosity_ambient_pct", "porosity_ncs_pct",
-            "grain_density_gcc",
-            "saturation_water_pct", "saturation_oil_pct", "saturation_total_pct",
-            "page_number", "notes"
-        ]
+        # Choose header style
+        if use_original_headers:
+            # Sanitize original headers for CSV injection protection
+            display_headers = [sanitize_csv_value(h) for h in self.ORIGINAL_HEADERS]
+        else:
+            display_headers = self.CANONICAL_HEADERS
 
-        with open(output_path, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=headers)
-            writer.writeheader()
+        # Write with UTF-8 BOM for Excel compatibility
+        with open(output_path, 'w', newline='', encoding='utf-8-sig') as f:
+            writer = csv.writer(f)
+            writer.writerow(display_headers)
+
             for sample in result.samples:
-                writer.writerow(sample.to_dict())
+                # Get values in the same order as headers
+                row = [
+                    sample.core_number,
+                    sample.sample_number,
+                    sample.depth_feet if sample.depth_feet is not None else "",
+                    sample.permeability_air_md if sample.permeability_air_md is not None else "",
+                    sample.permeability_klink_md if sample.permeability_klink_md is not None else "",
+                    sample.porosity_ambient_pct if sample.porosity_ambient_pct is not None else "",
+                    sample.porosity_ncs_pct if sample.porosity_ncs_pct is not None else "",
+                    sample.grain_density_gcc if sample.grain_density_gcc is not None else "",
+                    sample.saturation_water_pct if sample.saturation_water_pct is not None else "",
+                    sample.saturation_oil_pct if sample.saturation_oil_pct is not None else "",
+                    sample.saturation_total_pct if sample.saturation_total_pct is not None else "",
+                    sample.page_number,
+                    sample.notes,
+                ]
+                writer.writerow(row)
 
         return str(output_path)
 
@@ -519,6 +574,11 @@ def main():
         action="store_true",
         help="Output classification dict to stdout as JSON"
     )
+    parser.add_argument(
+        "--original-headers",
+        action="store_true",
+        help="Use original PDF headers instead of canonical names"
+    )
 
     args = parser.parse_args()
 
@@ -532,7 +592,11 @@ def main():
     extractor.print_summary(result)
 
     if not args.classify_only:
-        csv_path = extractor.save_csv(result, f"{args.output}/core_analysis.csv")
+        csv_path = extractor.save_csv(
+            result,
+            f"{args.output}/core_analysis.csv",
+            use_original_headers=args.original_headers,
+        )
         json_path = extractor.save_json(result, f"{args.output}/core_analysis.json")
 
         print(f"\nOutput files:")
