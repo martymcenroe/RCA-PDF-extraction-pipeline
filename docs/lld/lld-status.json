@@ -1,5 +1,38 @@
 {
   "version": "1.0",
-  "last_updated": "2026-01-30T00:38:21.765444+00:00",
-  "issues": {}
+  "last_updated": "2026-01-30T05:25:49.502031+00:00",
+  "issues": {
+    "4": {
+      "lld_path": "docs\\lld\\active\\LLD-004.md",
+      "status": "approved",
+      "has_gemini_review": true,
+      "final_verdict": "APPROVED",
+      "last_review_date": "2026-01-29",
+      "review_count": 1
+    },
+    "10": {
+      "lld_path": "docs\\lld\\active\\LLD-010.md",
+      "status": "approved",
+      "has_gemini_review": true,
+      "final_verdict": "APPROVED",
+      "last_review_date": "2026-01-29",
+      "review_count": 1
+    },
+    "5": {
+      "lld_path": "docs\\lld\\active\\LLD-005.md",
+      "status": "approved",
+      "has_gemini_review": true,
+      "final_verdict": "APPROVED",
+      "last_review_date": "2026-01-29",
+      "review_count": 1
+    },
+    "6": {
+      "lld_path": "docs\\lld\\active\\LLD-006.md",
+      "status": "approved",
+      "has_gemini_review": true,
+      "final_verdict": "APPROVED",
+      "last_review_date": "2026-01-29",
+      "review_count": 1
+    }
+  }
 }
