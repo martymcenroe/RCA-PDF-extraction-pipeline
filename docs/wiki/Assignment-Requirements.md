@@ -37,19 +37,22 @@ The assignment asks us to build a PDF extraction pipeline for Routine Core Analy
 - Sample parsing with depth value anchoring
 - Output: `full_table_extraction.csv`
 
-**Columns Extracted:**
-1. Core Number
-2. Sample Number
-3. Depth (ft)
-4. Permeability Air (md)
-5. Permeability Klinkenberg (md)
-6. Porosity Ambient (%)
-7. Porosity NCS (%)
-8. Grain Density (g/cc)
-9. Fluid Saturations Water (%)
-10. Fluid Saturations Oil (%)
-11. Fluid Saturations Total (%)
-12. Page Number (appended by us)
+**Exact Column Headers (from PDF):**
+
+| # | Header |
+|---|--------|
+| 1 | Core Number |
+| 2 | Sample Number |
+| 3 | Sample Depth, feet |
+| 4 | Permeability, millidarcys to Air |
+| 5 | Permeability, millidarcys Klinkenberg |
+| 6 | Porosity, percent Ambient |
+| 7 | Porosity, percent NCS |
+| 8 | Grain Density, gm/cc |
+| 9 | Fluid Saturations, percent Water |
+| 10 | Fluid Saturations, percent Oil |
+| 11 | Fluid Saturations, percent Total |
+| 12 | Page Number *(appended by pipeline)* |
 
 ### 3. Handle Header Variations Across Pages
 
