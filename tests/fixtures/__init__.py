@@ -1,1 +1,1 @@
-# Test fixtures
+"""Test fixtures for offline testing."""
