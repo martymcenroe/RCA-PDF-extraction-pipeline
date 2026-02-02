@@ -65,3 +65,6 @@ data/output/*_images/
 
 # Playwright MCP
 .playwright-mcp/
+
+# Word documents (commit PDFs only)
+*.docx
