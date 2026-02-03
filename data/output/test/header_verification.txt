@@ -1,0 +1,21 @@
+Header Verification Report
+==========================
+Generated: 2026-02-01 21:43:38
+
+Reference Page: 39
+Pages Checked: 39, 40, 41, 42
+
+Status: VERIFIED - All headers match across pages
+
+Headers (11 columns):
+  1. Core Number
+  2. Sample Number
+  3. Sample Depth, feet
+  4. Permeability, millidarcys to Air
+  5. Permeability, millidarcys Klinkenberg
+  6. Porosity, percent Ambient
+  7. Porosity, percent NCS
+  8. Grain Density, gm/cc
+  9. Fluid Saturations, percent Water
+  10. Fluid Saturations, percent Oil
+  11. Fluid Saturations, percent Total
