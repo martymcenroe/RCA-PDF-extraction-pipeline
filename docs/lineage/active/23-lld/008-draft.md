@@ -2,8 +2,8 @@
 
 <!-- Template Metadata
 Last Updated: 2026-02-02
-Updated By: Issue #23 LLD creation - Revision 2
-Update Reason: Fixed mechanical validation errors - verified src/ directory exists, corrected test file paths to use existing tests/ directory with flat naming
+Updated By: Issue #23 LLD creation - Revision 4
+Update Reason: Fixed mechanical validation errors - all Add files now have existing parent directories, tests/ uses flat naming convention
 -->
 
 ## 1. Context & Goal
@@ -50,14 +50,14 @@ Mechanical validation automatically checks:
 - All "Add" files must have existing parent directories OR be created in sequence
 
 **Directory Creation Order:**
-1. `ingestion/` - Create at repository root level
-2. `ingestion/modules/` - Create after `ingestion/`
+1. `ingestion/` - Create at repository root (parent: `.` exists ✓)
+2. `ingestion/modules/` - Create after `ingestion/` is established
 3. `tests/` - Already exists in repository ✓
 
 **File Creation Notes:**
-- All `ingestion/*` files will be created after the `ingestion/` directory is established at repo root
+- The repository root (`.`) exists, so `ingestion/` can be created there
+- All `ingestion/*` files will be created after the `ingestion/` directory is established
 - All `tests/test_ingestion_*.py` files use flat naming in existing `tests/` directory
-- The package lives at root level as `ingestion/` (not under `src/`)
 
 **If validation fails, the LLD is BLOCKED before reaching review.**
 
@@ -802,6 +802,8 @@ Risk mitigations mapped to functions:
 | Initial draft | 2026-02-02 | PENDING | Awaiting review |
 | Mechanical validation | 2026-02-02 | BLOCKED | Invalid file paths - missing parent directories |
 | Revision 1 | 2026-02-02 | BLOCKED | src/ directory does not exist |
-| Revision 2 | 2026-02-02 | PENDING | Fixed paths to use ingestion/ at repo root |
+| Revision 2 | 2026-02-02 | BLOCKED | Used ingestion/ at repo root, still invalid |
+| Revision 3 | 2026-02-02 | BLOCKED | Corrected to src/ingestion/ - src/ does not exist |
+| Revision 4 | 2026-02-02 | PENDING | Changed to ingestion/ at repo root (parent `.` exists) |
 
 **Final Status:** PENDING

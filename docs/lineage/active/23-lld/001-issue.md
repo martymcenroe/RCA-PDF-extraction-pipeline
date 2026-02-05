@@ -1,3 +1,10 @@
+---
+repo: martymcenroe/RCA-PDF-extraction-pipeline
+issue: 23
+url: https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/issues/23
+fetched: 2026-02-05T04:43:31.718676Z
+---
+
 # Issue #23: Data Ingestion Core Framework + USGS CRC Module
 
 # Data Ingestion Core Framework + USGS CRC Module
@@ -164,32 +171,32 @@ def sanitize_path_component(value: str, component_type: str = "generic") -> str:
 ## Files to Create/Modify
 
 ### New Files
-- `src/ingestion/__init__.py` â€” Package init with exports
-- `src/ingestion/core.py` â€” Base classes, controller, storage manager
-- `src/ingestion/sanitize.py` â€” Path sanitization utilities
-- `src/ingestion/modules/__init__.py` â€” Modules package init
-- `src/ingestion/modules/usgs.py` â€” USGS CRC source module
-- `src/ingestion/cli.py` â€” Click-based CLI interface
-- `tests/ingestion/__init__.py` â€” Test package init
-- `tests/ingestion/test_core.py` â€” Unit tests for core components
-- `tests/ingestion/test_sanitize.py` â€” Unit tests for path sanitization
-- `tests/ingestion/test_usgs.py` â€” Unit tests for USGS module
-- `tests/ingestion/test_integration.py` â€” Integration tests
+- `src/ingestion/__init__.py` — Package init with exports
+- `src/ingestion/core.py` — Base classes, controller, storage manager
+- `src/ingestion/sanitize.py` — Path sanitization utilities
+- `src/ingestion/modules/__init__.py` — Modules package init
+- `src/ingestion/modules/usgs.py` — USGS CRC source module
+- `src/ingestion/cli.py` — Click-based CLI interface
+- `tests/ingestion/__init__.py` — Test package init
+- `tests/ingestion/test_core.py` — Unit tests for core components
+- `tests/ingestion/test_sanitize.py` — Unit tests for path sanitization
+- `tests/ingestion/test_usgs.py` — Unit tests for USGS module
+- `tests/ingestion/test_integration.py` — Integration tests
 
 ### Modified Files
-- `pyproject.toml` â€” Add dependencies (httpx, zstandard==0.23.0, tenacity, beautifulsoup4, click)
-- `.gitignore` â€” Add `data/raw/`, `data/state/`
+- `pyproject.toml` — Add dependencies (httpx, zstandard==0.23.0, tenacity, beautifulsoup4, click)
+- `.gitignore` — Add `data/raw/`, `data/state/`
 
 ## Dependencies
 - None (first issue in ingestion epic)
 
 ## Out of Scope (Future)
-- Additional source modules (Kansas GS, state surveys) â€” separate issues
-- Parallel downloads within a source â€” optimization for later
-- Cloud storage backends (S3, GCS) â€” local-only for MVP
-- Web UI for monitoring â€” CLI only for now
-- Document deduplication across sources â€” future enhancement
-- Disk space pre-flight checks â€” evaluate after initial deployment
+- Additional source modules (Kansas GS, state surveys) — separate issues
+- Parallel downloads within a source — optimization for later
+- Cloud storage backends (S3, GCS) — local-only for MVP
+- Web UI for monitoring — CLI only for now
+- Document deduplication across sources — future enhancement
+- Disk space pre-flight checks — evaluate after initial deployment
 
 ## Acceptance Criteria
 - [ ] `python -m src.ingestion ingest usgs --limit 5` downloads 5 RCA PDFs
