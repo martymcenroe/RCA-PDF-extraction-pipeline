@@ -2,7 +2,7 @@
 repo: martymcenroe/RCA-PDF-extraction-pipeline
 issue: 23
 url: https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/issues/23
-fetched: 2026-02-05T04:43:31.718676Z
+fetched: 2026-02-05T05:15:04.954642Z
 ---
 
 # Issue #23: Data Ingestion Core Framework + USGS CRC Module
