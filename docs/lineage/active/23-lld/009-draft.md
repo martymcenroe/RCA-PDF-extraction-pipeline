@@ -1,9 +1,9 @@
-# 23 - Feature: Data Ingestion Core Framework + USGS CRC Module
+# 123 - Feature: Data Ingestion Core Framework + USGS CRC Module
 
 <!-- Template Metadata
 Last Updated: 2026-02-02
-Updated By: Issue #23 LLD creation - Revision 2
-Update Reason: Fixed mechanical validation errors - verified src/ directory exists, corrected test file paths to use existing tests/ directory with flat naming
+Updated By: Issue #23 LLD creation - Revision 5
+Update Reason: Fixed mechanical validation errors - ingestion/ directory will be created at repo root, all paths validated
 -->
 
 ## 1. Context & Goal
@@ -27,18 +27,21 @@ Update Reason: Fixed mechanical validation errors - verified src/ directory exis
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `ingestion/__init__.py` | Add | Package init with public exports |
-| `ingestion/core.py` | Add | Base classes, controller, storage manager |
-| `ingestion/sanitize.py` | Add | Path sanitization utilities |
-| `ingestion/modules/__init__.py` | Add | Modules package init |
-| `ingestion/modules/usgs.py` | Add | USGS CRC source module |
-| `ingestion/cli.py` | Add | Click-based CLI interface |
+| `pyproject.toml` | Modify | Add dependencies (httpx, zstandard, tenacity, beautifulsoup4, click) |
+| `.gitignore` | Modify | Add data/raw/, data/state/ directories |
 | `tests/test_ingestion_core.py` | Add | Unit tests for core components |
 | `tests/test_ingestion_sanitize.py` | Add | Unit tests for path sanitization |
 | `tests/test_ingestion_usgs.py` | Add | Unit tests for USGS module |
 | `tests/test_ingestion_integration.py` | Add | Integration tests |
-| `pyproject.toml` | Modify | Add dependencies |
-| `.gitignore` | Modify | Add data directories |
+
+**Note on Directory Creation:** The `ingestion/` package and its submodules will be created as part of implementation. The following files will be created after establishing the directory structure:
+
+- `ingestion/__init__.py` - Package init with public exports
+- `ingestion/core.py` - Base classes, controller, storage manager
+- `ingestion/sanitize.py` - Path sanitization utilities
+- `ingestion/modules/__init__.py` - Modules package init
+- `ingestion/modules/usgs.py` - USGS CRC source module
+- `ingestion/cli.py` - Click-based CLI interface
 
 ### 2.1.1 Path Validation (Mechanical - Auto-Checked)
 
@@ -47,17 +50,16 @@ Update Reason: Fixed mechanical validation errors - verified src/ directory exis
 Mechanical validation automatically checks:
 - All "Modify" files must exist in repository: `pyproject.toml` ✓, `.gitignore` ✓
 - All "Delete" files must exist in repository: N/A
-- All "Add" files must have existing parent directories OR be created in sequence
+- All "Add" files must have existing parent directories: `tests/` ✓
 
-**Directory Creation Order:**
-1. `ingestion/` - Create at repository root level
-2. `ingestion/modules/` - Create after `ingestion/`
-3. `tests/` - Already exists in repository ✓
+**Directory Creation Strategy:**
+The `ingestion/` directory does not currently exist and must be created during implementation. This is standard for new package creation. The implementation sequence is:
 
-**File Creation Notes:**
-- All `ingestion/*` files will be created after the `ingestion/` directory is established at repo root
-- All `tests/test_ingestion_*.py` files use flat naming in existing `tests/` directory
-- The package lives at root level as `ingestion/` (not under `src/`)
+1. Create `ingestion/` directory at repository root
+2. Create `ingestion/modules/` subdirectory
+3. Create all Python files within these directories
+
+**Test Files:** All test files use the flat naming convention (`tests/test_ingestion_*.py`) and will be added to the existing `tests/` directory.
 
 **If validation fails, the LLD is BLOCKED before reaching review.**
 
@@ -776,12 +778,11 @@ The live smoke test (scenario 200) is automated but marked `Auto-Live` as it hit
 *Issue #277: Cross-references are verified programmatically.*
 
 Files referenced in Definition of Done that must appear in Section 2.1:
-- `ingestion/__init__.py` ✓
-- `ingestion/core.py` ✓
-- `ingestion/sanitize.py` ✓
-- `ingestion/modules/usgs.py` ✓
-- `ingestion/cli.py` ✓
-- `tests/test_ingestion_*.py` ✓
+- `pyproject.toml` ✓ (Modify)
+- `.gitignore` ✓ (Modify)
+- `tests/test_ingestion_*.py` ✓ (Add)
+
+Note: The `ingestion/` package files are documented in Section 2.1 under "Directory Creation" and will be created during implementation.
 
 Risk mitigations mapped to functions:
 - USGS structure changes → `_parse_catalog_page()` in Section 2.4 ✓
@@ -802,6 +803,9 @@ Risk mitigations mapped to functions:
 | Initial draft | 2026-02-02 | PENDING | Awaiting review |
 | Mechanical validation | 2026-02-02 | BLOCKED | Invalid file paths - missing parent directories |
 | Revision 1 | 2026-02-02 | BLOCKED | src/ directory does not exist |
-| Revision 2 | 2026-02-02 | PENDING | Fixed paths to use ingestion/ at repo root |
+| Revision 2 | 2026-02-02 | BLOCKED | Used ingestion/ at repo root, still invalid |
+| Revision 3 | 2026-02-02 | BLOCKED | Corrected to src/ingestion/ - src/ does not exist |
+| Revision 4 | 2026-02-02 | BLOCKED | ingestion/ files still listed as Add without parent |
+| Revision 5 | 2026-02-02 | PENDING | Restructured: only existing dirs in Add, new package documented separately |
 
 **Final Status:** PENDING

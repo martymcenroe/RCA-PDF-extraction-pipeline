@@ -2,8 +2,8 @@
 
 <!-- Template Metadata
 Last Updated: 2026-02-02
-Updated By: Issue #23 LLD creation - Revision 2
-Update Reason: Fixed mechanical validation errors - verified src/ directory exists, corrected test file paths to use existing tests/ directory with flat naming
+Updated By: Issue #23 LLD creation
+Update Reason: Fixed mechanical validation errors - corrected issue number and file paths
 -->
 
 ## 1. Context & Goal
@@ -27,16 +27,19 @@ Update Reason: Fixed mechanical validation errors - verified src/ directory exis
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `ingestion/__init__.py` | Add | Package init with public exports |
-| `ingestion/core.py` | Add | Base classes, controller, storage manager |
-| `ingestion/sanitize.py` | Add | Path sanitization utilities |
-| `ingestion/modules/__init__.py` | Add | Modules package init |
-| `ingestion/modules/usgs.py` | Add | USGS CRC source module |
-| `ingestion/cli.py` | Add | Click-based CLI interface |
-| `tests/test_ingestion_core.py` | Add | Unit tests for core components |
-| `tests/test_ingestion_sanitize.py` | Add | Unit tests for path sanitization |
-| `tests/test_ingestion_usgs.py` | Add | Unit tests for USGS module |
-| `tests/test_ingestion_integration.py` | Add | Integration tests |
+| `src/__init__.py` | Add | Root src package init (if not exists) |
+| `src/ingestion/__init__.py` | Add | Package init with public exports |
+| `src/ingestion/core.py` | Add | Base classes, controller, storage manager |
+| `src/ingestion/sanitize.py` | Add | Path sanitization utilities |
+| `src/ingestion/modules/__init__.py` | Add | Modules package init |
+| `src/ingestion/modules/usgs.py` | Add | USGS CRC source module |
+| `src/ingestion/cli.py` | Add | Click-based CLI interface |
+| `tests/__init__.py` | Add | Root tests package init (if not exists) |
+| `tests/ingestion/__init__.py` | Add | Test package init |
+| `tests/ingestion/test_core.py` | Add | Unit tests for core components |
+| `tests/ingestion/test_sanitize.py` | Add | Unit tests for path sanitization |
+| `tests/ingestion/test_usgs.py` | Add | Unit tests for USGS module |
+| `tests/ingestion/test_integration.py` | Add | Integration tests |
 | `pyproject.toml` | Modify | Add dependencies |
 | `.gitignore` | Modify | Add data directories |
 
@@ -45,19 +48,16 @@ Update Reason: Fixed mechanical validation errors - verified src/ directory exis
 *Issue #277: Before human or Gemini review, paths are verified programmatically.*
 
 Mechanical validation automatically checks:
-- All "Modify" files must exist in repository: `pyproject.toml` ✓, `.gitignore` ✓
+- All "Modify" files must exist in repository: `pyproject.toml`, `.gitignore` ✓
 - All "Delete" files must exist in repository: N/A
 - All "Add" files must have existing parent directories OR be created in sequence
 
 **Directory Creation Order:**
-1. `ingestion/` - Create at repository root level
-2. `ingestion/modules/` - Create after `ingestion/`
-3. `tests/` - Already exists in repository ✓
-
-**File Creation Notes:**
-- All `ingestion/*` files will be created after the `ingestion/` directory is established at repo root
-- All `tests/test_ingestion_*.py` files use flat naming in existing `tests/` directory
-- The package lives at root level as `ingestion/` (not under `src/`)
+1. `src/` - Create if not exists
+2. `src/ingestion/` - Create after src/
+3. `src/ingestion/modules/` - Create after src/ingestion/
+4. `tests/` - Create if not exists
+5. `tests/ingestion/` - Create after tests/
 
 **If validation fails, the LLD is BLOCKED before reaching review.**
 
@@ -130,7 +130,7 @@ class CircuitBreakerState(TypedDict):
 ### 2.4 Function Signatures
 
 ```python
-# ingestion/sanitize.py
+# src/ingestion/sanitize.py
 def sanitize_path_component(value: str, component_type: str = "generic") -> str:
     """
     Sanitize a string for safe use in file paths.
@@ -151,7 +151,7 @@ def validate_state_code(code: str) -> str:
     """Validate and normalize state code to 2-letter abbreviation."""
     ...
 
-# ingestion/core.py
+# src/ingestion/core.py
 class SourceModule(ABC):
     """Abstract base class for data source modules."""
     
@@ -240,7 +240,7 @@ class IngestionController:
         """Get ingestion status for sources."""
         ...
 
-# ingestion/modules/usgs.py
+# src/ingestion/modules/usgs.py
 class USGSModule(SourceModule):
     """USGS Core Research Center source module."""
     
@@ -275,7 +275,7 @@ class USGSModule(SourceModule):
         """Check if document is an RCA based on keywords."""
         ...
 
-# ingestion/cli.py
+# src/ingestion/cli.py
 @click.group()
 def cli():
     """RCA document ingestion CLI."""
@@ -361,7 +361,7 @@ def status(source: str | None):
 
 ### 2.6 Technical Approach
 
-* **Module:** `ingestion/`
+* **Module:** `src/ingestion/`
 * **Pattern:** Strategy pattern for source modules, Circuit Breaker for resilience
 * **Key Decisions:**
   - Async HTTP with `httpx` for efficient I/O
@@ -390,7 +390,7 @@ def status(source: str | None):
 
 *What must be true when this is done. These become acceptance criteria.*
 
-1. `python -m ingestion ingest usgs --limit 5` downloads 5 RCA PDFs
+1. `python -m src.ingestion ingest usgs --limit 5` downloads 5 RCA PDFs
 2. Downloaded files are zstd-compressed with `.pdf.zst` extension
 3. Manifest file created at `data/raw/usgs/manifest.json` with SHA256 checksums
 4. Interrupted ingestion resumes from checkpoint without re-downloading
@@ -692,7 +692,7 @@ sequenceDiagram
 - [ ] All tests written before implementation
 - [ ] Tests currently RED (failing)
 - [ ] Test IDs match scenario IDs in 10.1
-- [ ] Test files created at: `tests/test_ingestion_*.py`
+- [ ] Test files created at: `tests/ingestion/test_*.py`
 
 ### 10.1 Test Scenarios
 
@@ -723,16 +723,16 @@ sequenceDiagram
 
 ```bash
 # Run all automated tests
-poetry run pytest tests/test_ingestion_*.py -v
+poetry run pytest tests/ingestion/ -v
 
 # Run only fast/mocked tests (exclude live)
-poetry run pytest tests/test_ingestion_*.py -v -m "not live"
+poetry run pytest tests/ingestion/ -v -m "not live"
 
 # Run live integration tests
-poetry run pytest tests/test_ingestion_*.py -v -m live
+poetry run pytest tests/ingestion/ -v -m live
 
 # Run with coverage
-poetry run pytest tests/test_ingestion_*.py -v --cov=ingestion --cov-report=term-missing
+poetry run pytest tests/ingestion/ -v --cov=src/ingestion --cov-report=term-missing
 ```
 
 ### 10.3 Manual Tests (Only If Unavoidable)
@@ -776,12 +776,12 @@ The live smoke test (scenario 200) is automated but marked `Auto-Live` as it hit
 *Issue #277: Cross-references are verified programmatically.*
 
 Files referenced in Definition of Done that must appear in Section 2.1:
-- `ingestion/__init__.py` ✓
-- `ingestion/core.py` ✓
-- `ingestion/sanitize.py` ✓
-- `ingestion/modules/usgs.py` ✓
-- `ingestion/cli.py` ✓
-- `tests/test_ingestion_*.py` ✓
+- `src/ingestion/__init__.py` ✓
+- `src/ingestion/core.py` ✓
+- `src/ingestion/sanitize.py` ✓
+- `src/ingestion/modules/usgs.py` ✓
+- `src/ingestion/cli.py` ✓
+- `tests/ingestion/test_*.py` ✓
 
 Risk mitigations mapped to functions:
 - USGS structure changes → `_parse_catalog_page()` in Section 2.4 ✓
@@ -800,8 +800,5 @@ Risk mitigations mapped to functions:
 | Review | Date | Verdict | Key Issue |
 |--------|------|---------|-----------|
 | Initial draft | 2026-02-02 | PENDING | Awaiting review |
-| Mechanical validation | 2026-02-02 | BLOCKED | Invalid file paths - missing parent directories |
-| Revision 1 | 2026-02-02 | BLOCKED | src/ directory does not exist |
-| Revision 2 | 2026-02-02 | PENDING | Fixed paths to use ingestion/ at repo root |
 
 **Final Status:** PENDING
