@@ -2,7 +2,7 @@
 repo: martymcenroe/RCA-PDF-extraction-pipeline
 issue: 25
 url: https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/issues/25
-fetched: 2026-02-05T15:31:33.904792Z
+fetched: 2026-02-05T16:58:38.464918Z
 ---
 
 # Issue #25: Texas University Lands Data Ingestion Module
