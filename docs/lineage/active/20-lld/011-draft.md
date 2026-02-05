@@ -27,32 +27,27 @@ Previous: Added sections based on 80 blocking issues from 164 governance verdict
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `src/validation/__init__.py` | Add | Package initializer for validation module |
-| `src/validation/validators.py` | Add | Core validation functions (date, VIN, currency, mileage) |
-| `src/validation/schemas.py` | Add | Pydantic models for document type validation |
-| `src/validation/rules.py` | Add | Cross-field validation rule engine |
-| `src/validation/report.py` | Add | Validation report generation |
-| `src/validation/vin_decoder.py` | Add | VIN checksum and year decoding utilities |
-| `src/pipeline/stages/__init__.py` | Modify | Register validation stage |
-| `src/pipeline/stages/validate.py` | Add | Pipeline stage integration |
-| `config/validation_rules.yaml` | Add | Document-type-specific validation configuration |
+| `src/elementizer/__init__.py` | Modify | Register validation stage in pipeline |
+| `src/elementizer/validation.py` | Add | Consolidated validation module with all validators, schemas, rules, and report generation |
+| `src/elementizer/vin_decoder.py` | Add | VIN checksum and year decoding utilities |
+| `src/elementizer/validation_stage.py` | Add | Pipeline stage integration |
+| `validation_rules.yaml` | Add | Document-type-specific validation configuration (project root) |
 | `tools/validate_extraction.py` | Add | CLI tool for running validation on extracted JSON |
 | `tools/validate_config.py` | Add | CLI tool for validating configuration files |
-| `tests/validation/__init__.py` | Add | Test package initializer |
-| `tests/validation/test_validators.py` | Add | Unit tests for core validators |
-| `tests/validation/test_schemas.py` | Add | Unit tests for Pydantic schemas |
-| `tests/validation/test_rules.py` | Add | Unit tests for cross-field rules |
-| `tests/validation/test_report.py` | Add | Unit tests for report generation |
-| `tests/validation/test_vin_decoder.py` | Add | Unit tests for VIN utilities |
-| `tests/validation/test_pipeline_integration.py` | Add | Integration tests for pipeline stage |
-| `tests/validation/fixtures/valid_auto_claim.json` | Add | Valid auto claim fixture |
-| `tests/validation/fixtures/valid_property_claim.json` | Add | Valid property claim fixture |
-| `tests/validation/fixtures/invalid_vin_checksum.json` | Add | Invalid VIN checksum fixture |
-| `tests/validation/fixtures/invalid_date_format.json` | Add | Invalid date format fixture |
-| `tests/validation/fixtures/missing_required_fields.json` | Add | Missing required fields fixture |
-| `tests/validation/fixtures/warning_high_mileage.json` | Add | High mileage warning fixture |
-| `tests/validation/fixtures/warning_sum_mismatch.json` | Add | Sum mismatch within tolerance fixture |
-| `docs/0003-file-inventory.md` | Modify | Add new validation files to inventory |
+| `tests/unit/test_validators.py` | Add | Unit tests for core validators |
+| `tests/unit/test_schemas.py` | Add | Unit tests for Pydantic schemas |
+| `tests/unit/test_rules.py` | Add | Unit tests for cross-field rules |
+| `tests/unit/test_report.py` | Add | Unit tests for report generation |
+| `tests/unit/test_vin_decoder.py` | Add | Unit tests for VIN utilities |
+| `tests/integration/test_validation_pipeline.py` | Add | Integration tests for pipeline stage |
+| `tests/fixtures/valid_auto_claim.json` | Add | Valid auto claim fixture |
+| `tests/fixtures/valid_property_claim.json` | Add | Valid property claim fixture |
+| `tests/fixtures/invalid_vin_checksum.json` | Add | Invalid VIN checksum fixture |
+| `tests/fixtures/invalid_date_format.json` | Add | Invalid date format fixture |
+| `tests/fixtures/missing_required_fields.json` | Add | Missing required fields fixture |
+| `tests/fixtures/warning_high_mileage.json` | Add | High mileage warning fixture |
+| `tests/fixtures/warning_sum_mismatch.json` | Add | Sum mismatch within tolerance fixture |
+| `docs/validation-rules-reference.md` | Add | Validation rules reference documentation |
 
 ### 2.1.1 Path Validation (Mechanical - Auto-Checked)
 
@@ -63,6 +58,17 @@ Mechanical validation automatically checks:
 - All "Delete" files must exist in repository
 - All "Add" files must have existing parent directories
 - No placeholder prefixes (`src/`, `lib/`, `app/`) unless directory exists
+
+**Path Validation Notes:**
+- `src/elementizer/` directory exists (verified - parent for new validation files)
+- `src/elementizer/__init__.py` exists (modified to register validation)
+- `tests/unit/` directory exists (verified)
+- `tests/integration/` directory exists (verified)
+- `tests/fixtures/` directory exists (verified)
+- `docs/` directory exists (verified)
+- `tools/` directory exists (verified)
+- Project root exists for `validation_rules.yaml`
+- All new files placed directly in `src/elementizer/` directory (no nested subdirectories requiring creation)
 
 **If validation fails, the LLD is BLOCKED before reaching review.**
 
@@ -116,7 +122,7 @@ class ValidationConfig(TypedDict):
 ### 2.4 Function Signatures
 
 ```python
-# src/validation/validators.py
+# src/elementizer/validation.py
 def validate_date(value: str, formats: list[str] | None = None) -> tuple[bool, int, str]:
     """Validate date string against supported formats. Returns (valid, confidence, message)."""
     ...
@@ -137,20 +143,10 @@ def validate_policy_number(value: str, pattern: str) -> tuple[bool, int, str]:
     """Validate policy number against configurable regex pattern."""
     ...
 
-# src/validation/vin_decoder.py
-def calculate_vin_checksum(vin: str) -> str:
-    """Calculate expected checksum digit for VIN."""
+def get_schema_for_document_type(doc_type: str) -> type:
+    """Return appropriate Pydantic model for document type."""
     ...
 
-def decode_vin_year(vin: str) -> int | None:
-    """Extract model year from VIN 10th digit. Returns year or None if invalid."""
-    ...
-
-def estimate_vehicle_age_years(vin: str, reference_date: str | None = None) -> int | None:
-    """Calculate vehicle age in years from VIN."""
-    ...
-
-# src/validation/rules.py
 def check_date_ordering(loss_date: str, effective_date: str, expiration_date: str) -> FieldValidationResult:
     """Verify loss date is within policy period."""
     ...
@@ -167,12 +163,6 @@ def check_required_fields(data: dict, required: list[str]) -> list[FieldValidati
     """Check all required fields are present and non-empty."""
     ...
 
-# src/validation/schemas.py
-def get_schema_for_document_type(doc_type: str) -> type:
-    """Return appropriate Pydantic model for document type."""
-    ...
-
-# src/validation/report.py
 def generate_validation_report(
     document_id: str,
     document_type: str,
@@ -186,11 +176,24 @@ def sanitize_report_for_logging(report: ValidationReport) -> dict:
     """Strip PII from report for non-secure logging."""
     ...
 
-# src/pipeline/stages/validate.py
+# src/elementizer/vin_decoder.py
+def calculate_vin_checksum(vin: str) -> str:
+    """Calculate expected checksum digit for VIN."""
+    ...
+
+def decode_vin_year(vin: str) -> int | None:
+    """Extract model year from VIN 10th digit. Returns year or None if invalid."""
+    ...
+
+def estimate_vehicle_age_years(vin: str, reference_date: str | None = None) -> int | None:
+    """Calculate vehicle age in years from VIN."""
+    ...
+
+# src/elementizer/validation_stage.py
 def validate_extraction(
     extracted_data: dict,
     document_type: str,
-    config_path: str = "config/validation_rules.yaml"
+    config_path: str = "validation_rules.yaml"
 ) -> tuple[ValidationReport, bool]:
     """Run validation on extracted data. Returns (report, should_proceed)."""
     ...
@@ -262,7 +265,7 @@ PIPELINE DECISION:
 
 ### 2.6 Technical Approach
 
-* **Module:** `src/validation/`
+* **Module:** `src/elementizer/`
 * **Pattern:** Strategy pattern for validators; Rule Engine for cross-field validation
 * **Key Decisions:**
   - Pydantic v2 for schema validation with custom validators
@@ -270,6 +273,7 @@ PIPELINE DECISION:
   - YAML configuration for flexibility without code changes
   - Composable validation functions that can be enabled/disabled per document type
   - Explicit PII stripping in error handling to prevent log leakage
+  - Flat module structure (no nested `validation/` subdirectory) to simplify file creation
 
 ### 2.7 Architecture Decisions
 
@@ -282,6 +286,7 @@ PIPELINE DECISION:
 | Configuration format | JSON, YAML, TOML, Python dicts | YAML | Human-readable, supports comments, easy to edit |
 | Error severity model | Binary pass/fail, Three-tier (error/warning/info) | Two-tier (ERROR/WARNING) | Matches issue requirements; INFO adds complexity without value |
 | Pipeline integration | Middleware, Discrete stage, Decorator | Discrete stage | Matches existing pipeline architecture, clear separation of concerns |
+| Module structure | Nested subdirectory, Flat files | Flat files | Avoids directory creation issues; simpler imports |
 
 **Architectural Constraints:**
 - Must integrate with existing pipeline stage pattern
@@ -304,7 +309,7 @@ PIPELINE DECISION:
 9. Validation report generated in structured JSON format with confidence scores
 10. Issues categorized as ERROR or WARNING based on severity
 11. Validation rules configurable per document type via YAML
-12. Default validation values defined in `config/validation_rules.yaml`
+12. Default validation values defined in `validation_rules.yaml`
 13. Pipeline blocks on ERROR-level validation failures
 14. Pipeline proceeds with WARNING-level issues flagged for review
 
@@ -358,7 +363,7 @@ PDF Extraction Stage ──JSON output──► Validation Stage ──JSON + Re
 
 ### 5.4 Deployment Pipeline
 
-Configuration file (`config/validation_rules.yaml`) deployed alongside application code. Changes to validation thresholds require deployment cycle.
+Configuration file (`validation_rules.yaml`) deployed alongside application code. Changes to validation thresholds require deployment cycle.
 
 **No external data utilities needed** — validation operates on pipeline-internal data.
 
@@ -552,7 +557,7 @@ flowchart TD
 - [ ] All tests written before implementation
 - [ ] Tests currently RED (failing)
 - [ ] Test IDs match scenario IDs in 10.1
-- [ ] Test file created at: `tests/validation/test_validators.py`, `tests/validation/test_rules.py`, etc.
+- [ ] Test file created at: `tests/unit/test_validators.py`, `tests/unit/test_rules.py`, etc.
 
 ### 10.1 Test Scenarios
 
@@ -593,16 +598,19 @@ flowchart TD
 
 ```bash
 # Run all validation tests
-poetry run pytest tests/validation/ -v
+poetry run pytest tests/unit/test_validators.py tests/unit/test_schemas.py tests/unit/test_rules.py tests/unit/test_report.py tests/unit/test_vin_decoder.py -v
+
+# Run integration tests
+poetry run pytest tests/integration/test_validation_pipeline.py -v
 
 # Run only fast/mocked tests (exclude live)
-poetry run pytest tests/validation/ -v -m "not live"
+poetry run pytest tests/unit/ -v -m "not live"
 
 # Run with coverage
-poetry run pytest tests/validation/ -v --cov=src/validation --cov-report=term-missing
+poetry run pytest tests/unit/test_validators.py tests/unit/test_rules.py -v --cov=src/elementizer --cov-report=term-missing
 
 # Run specific test file
-poetry run pytest tests/validation/test_validators.py -v
+poetry run pytest tests/unit/test_validators.py -v
 ```
 
 ### 10.3 Manual Tests (Only If Unavoidable)
@@ -633,9 +641,8 @@ poetry run pytest tests/validation/test_validators.py -v
 - [ ] LLD updated with any deviations
 - [ ] Implementation Report (0103) completed
 - [ ] Test Report (0113) completed if applicable
-- [ ] `docs/0003-file-inventory.md` updated with new files
 - [ ] Pipeline architecture wiki page updated with validation stage
-- [ ] Validation rules reference documentation created
+- [ ] Validation rules reference documentation created (`docs/validation-rules-reference.md`)
 
 ### Review
 - [ ] Code review completed

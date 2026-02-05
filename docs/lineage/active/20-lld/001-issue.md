@@ -1,3 +1,10 @@
+---
+repo: martymcenroe/RCA-PDF-extraction-pipeline
+issue: 20
+url: https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/issues/20
+fetched: 2026-02-05T03:44:57.309096Z
+---
+
 # Issue #20: Automated Data Validation for PDF Extraction Pipeline
 
 # Automated Data Validation for PDF Extraction Pipeline
@@ -88,24 +95,24 @@ Add an automated validation layer after PDF extraction that validates field form
 - Configuration files should be read-only in production to prevent rule tampering
 
 ## Files to Create/Modify
-- `src/validation/validators.py` â€” Core validation functions (date, VIN, currency, etc.)
-- `src/validation/schemas.py` â€” Pydantic models for each document type
-- `src/validation/rules.py` â€” Cross-field validation rule engine
-- `src/validation/report.py` â€” Validation report generation
-- `src/pipeline/stages/validate.py` â€” Pipeline stage integration
-- `config/validation_rules.yaml` â€” Document-type-specific validation configuration with default values
-- `tests/validation/` â€” Unit and integration tests for validation layer
-- `tests/validation/fixtures/` â€” Static JSON fixtures library (valid, invalid, warning-state samples)
+- `src/validation/validators.py` — Core validation functions (date, VIN, currency, etc.)
+- `src/validation/schemas.py` — Pydantic models for each document type
+- `src/validation/rules.py` — Cross-field validation rule engine
+- `src/validation/report.py` — Validation report generation
+- `src/pipeline/stages/validate.py` — Pipeline stage integration
+- `config/validation_rules.yaml` — Document-type-specific validation configuration with default values
+- `tests/validation/` — Unit and integration tests for validation layer
+- `tests/validation/fixtures/` — Static JSON fixtures library (valid, invalid, warning-state samples)
 
 ## Dependencies
-- None â€” can be implemented independently of other pipeline work
+- None — can be implemented independently of other pipeline work
 
 ## Out of Scope (Future)
-- ML-based anomaly detection for edge cases â€” defer to follow-up issue once baseline rules are established
-- Historical data analysis to auto-tune thresholds â€” nice-to-have, not MVP
-- UI for configuring validation rules â€” configuration via YAML files for MVP
-- Auto-correction of invalid values â€” flag only, no automatic fixes
-- External VIN decoding API integration â€” using local 10th digit logic for MVP
+- ML-based anomaly detection for edge cases — defer to follow-up issue once baseline rules are established
+- Historical data analysis to auto-tune thresholds — nice-to-have, not MVP
+- UI for configuring validation rules — configuration via YAML files for MVP
+- Auto-correction of invalid values — flag only, no automatic fixes
+- External VIN decoding API integration — using local 10th digit logic for MVP
 
 ## Acceptance Criteria
 - [ ] Date fields validated for MM/DD/YYYY and ISO8601 formats

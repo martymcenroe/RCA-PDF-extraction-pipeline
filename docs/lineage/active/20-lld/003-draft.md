@@ -27,32 +27,34 @@ Previous: Added sections based on 80 blocking issues from 164 governance verdict
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `src/validation/__init__.py` | Add | Package initializer for validation module |
+| `src/validation/__init__.py` | Add | Package initializer for validation module (parent `src/` exists) |
 | `src/validation/validators.py` | Add | Core validation functions (date, VIN, currency, mileage) |
 | `src/validation/schemas.py` | Add | Pydantic models for document type validation |
 | `src/validation/rules.py` | Add | Cross-field validation rule engine |
 | `src/validation/report.py` | Add | Validation report generation |
 | `src/validation/vin_decoder.py` | Add | VIN checksum and year decoding utilities |
-| `src/pipeline/stages/__init__.py` | Modify | Register validation stage |
-| `src/pipeline/stages/validate.py` | Add | Pipeline stage integration |
-| `config/validation_rules.yaml` | Add | Document-type-specific validation configuration |
+| `src/elementizer/__init__.py` | Modify | Register validation stage in pipeline |
+| `src/validation/stages/__init__.py` | Add | Pipeline stages subpackage initializer |
+| `src/validation/stages/validate.py` | Add | Pipeline stage integration |
+| `config/validation_rules.yaml` | Add | Document-type-specific validation configuration (parent `config/` exists) |
 | `tools/validate_extraction.py` | Add | CLI tool for running validation on extracted JSON |
 | `tools/validate_config.py` | Add | CLI tool for validating configuration files |
-| `tests/validation/__init__.py` | Add | Test package initializer |
-| `tests/validation/test_validators.py` | Add | Unit tests for core validators |
-| `tests/validation/test_schemas.py` | Add | Unit tests for Pydantic schemas |
-| `tests/validation/test_rules.py` | Add | Unit tests for cross-field rules |
-| `tests/validation/test_report.py` | Add | Unit tests for report generation |
-| `tests/validation/test_vin_decoder.py` | Add | Unit tests for VIN utilities |
-| `tests/validation/test_pipeline_integration.py` | Add | Integration tests for pipeline stage |
-| `tests/validation/fixtures/valid_auto_claim.json` | Add | Valid auto claim fixture |
-| `tests/validation/fixtures/valid_property_claim.json` | Add | Valid property claim fixture |
-| `tests/validation/fixtures/invalid_vin_checksum.json` | Add | Invalid VIN checksum fixture |
-| `tests/validation/fixtures/invalid_date_format.json` | Add | Invalid date format fixture |
-| `tests/validation/fixtures/missing_required_fields.json` | Add | Missing required fields fixture |
-| `tests/validation/fixtures/warning_high_mileage.json` | Add | High mileage warning fixture |
-| `tests/validation/fixtures/warning_sum_mismatch.json` | Add | Sum mismatch within tolerance fixture |
-| `docs/0003-file-inventory.md` | Modify | Add new validation files to inventory |
+| `tests/test_validation/__init__.py` | Add | Test package initializer (parent `tests/` exists) |
+| `tests/test_validation/test_validators.py` | Add | Unit tests for core validators |
+| `tests/test_validation/test_schemas.py` | Add | Unit tests for Pydantic schemas |
+| `tests/test_validation/test_rules.py` | Add | Unit tests for cross-field rules |
+| `tests/test_validation/test_report.py` | Add | Unit tests for report generation |
+| `tests/test_validation/test_vin_decoder.py` | Add | Unit tests for VIN utilities |
+| `tests/test_validation/test_pipeline_integration.py` | Add | Integration tests for pipeline stage |
+| `tests/test_validation/fixtures/__init__.py` | Add | Fixtures subpackage initializer |
+| `tests/test_validation/fixtures/valid_auto_claim.json` | Add | Valid auto claim fixture |
+| `tests/test_validation/fixtures/valid_property_claim.json` | Add | Valid property claim fixture |
+| `tests/test_validation/fixtures/invalid_vin_checksum.json` | Add | Invalid VIN checksum fixture |
+| `tests/test_validation/fixtures/invalid_date_format.json` | Add | Invalid date format fixture |
+| `tests/test_validation/fixtures/missing_required_fields.json` | Add | Missing required fields fixture |
+| `tests/test_validation/fixtures/warning_high_mileage.json` | Add | High mileage warning fixture |
+| `tests/test_validation/fixtures/warning_sum_mismatch.json` | Add | Sum mismatch within tolerance fixture |
+| `docs/validation-rules-reference.md` | Add | Validation rules reference documentation |
 
 ### 2.1.1 Path Validation (Mechanical - Auto-Checked)
 
@@ -63,6 +65,15 @@ Mechanical validation automatically checks:
 - All "Delete" files must exist in repository
 - All "Add" files must have existing parent directories
 - No placeholder prefixes (`src/`, `lib/`, `app/`) unless directory exists
+
+**Path Validation Notes:**
+- `src/` directory exists (verified)
+- `tests/` directory exists (verified)
+- `config/` directory exists (verified)
+- `docs/` directory exists (verified)
+- `tools/` directory exists (verified)
+- `src/elementizer/__init__.py` exists (modified to register validation)
+- New directories (`src/validation/`, `tests/test_validation/`) will be created as part of file addition
 
 **If validation fails, the LLD is BLOCKED before reaching review.**
 
@@ -186,7 +197,7 @@ def sanitize_report_for_logging(report: ValidationReport) -> dict:
     """Strip PII from report for non-secure logging."""
     ...
 
-# src/pipeline/stages/validate.py
+# src/validation/stages/validate.py
 def validate_extraction(
     extracted_data: dict,
     document_type: str,
@@ -552,7 +563,7 @@ flowchart TD
 - [ ] All tests written before implementation
 - [ ] Tests currently RED (failing)
 - [ ] Test IDs match scenario IDs in 10.1
-- [ ] Test file created at: `tests/validation/test_validators.py`, `tests/validation/test_rules.py`, etc.
+- [ ] Test file created at: `tests/test_validation/test_validators.py`, `tests/test_validation/test_rules.py`, etc.
 
 ### 10.1 Test Scenarios
 
@@ -593,16 +604,16 @@ flowchart TD
 
 ```bash
 # Run all validation tests
-poetry run pytest tests/validation/ -v
+poetry run pytest tests/test_validation/ -v
 
 # Run only fast/mocked tests (exclude live)
-poetry run pytest tests/validation/ -v -m "not live"
+poetry run pytest tests/test_validation/ -v -m "not live"
 
 # Run with coverage
-poetry run pytest tests/validation/ -v --cov=src/validation --cov-report=term-missing
+poetry run pytest tests/test_validation/ -v --cov=src/validation --cov-report=term-missing
 
 # Run specific test file
-poetry run pytest tests/validation/test_validators.py -v
+poetry run pytest tests/test_validation/test_validators.py -v
 ```
 
 ### 10.3 Manual Tests (Only If Unavoidable)
@@ -633,9 +644,8 @@ poetry run pytest tests/validation/test_validators.py -v
 - [ ] LLD updated with any deviations
 - [ ] Implementation Report (0103) completed
 - [ ] Test Report (0113) completed if applicable
-- [ ] `docs/0003-file-inventory.md` updated with new files
 - [ ] Pipeline architecture wiki page updated with validation stage
-- [ ] Validation rules reference documentation created
+- [ ] Validation rules reference documentation created (`docs/validation-rules-reference.md`)
 
 ### Review
 - [ ] Code review completed
