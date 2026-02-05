@@ -20,32 +20,73 @@
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `ingestion/__init__.py` | Add | Package init for ingestion module |
-| `ingestion/modules/__init__.py` | Add | Module registry with Texas module registration |
-| `ingestion/modules/texas.py` | Add | New module implementing `TexasModule` class |
+| `src/__init__.py` | Modify | Ensure package is properly initialized |
+| `src/ingestion/__init__.py` | Add | Package init for ingestion module (after creating `src/ingestion/` directory) |
+| `src/ingestion/modules/__init__.py` | Add | Module registry with Texas module registration (after creating `src/ingestion/modules/` directory) |
+| `src/ingestion/modules/texas.py` | Add | New module implementing `TexasModule` class |
+| `tests/__init__.py` | Modify | Ensure test package is properly initialized |
 | `tests/test_texas.py` | Add | Unit tests for module functionality |
 | `tests/test_texas_integration.py` | Add | Integration tests with mocked server |
-| `tests/fixtures/texas/county_search_andrews.json` | Add | Sample county search response fixture |
-| `tests/fixtures/texas/well_documents_42_003_12345.json` | Add | Sample well document listing fixture |
-| `tests/fixtures/texas/sample_rca.pdf` | Add | Small sample PDF for download tests |
-| `tests/fixtures/texas/robots.txt` | Add | Cached robots.txt for compliance testing |
+| `tests/fixtures/__init__.py` | Add | Fixtures package init (after creating `tests/fixtures/` directory) |
+| `tests/fixtures/texas_county_search_andrews.json` | Add | Sample county search response fixture |
+| `tests/fixtures/texas_well_documents_42_003_12345.json` | Add | Sample well document listing fixture |
+| `tests/fixtures/texas_sample_rca.pdf` | Add | Small sample PDF for download tests |
+| `tests/fixtures/texas_robots.txt` | Add | Cached robots.txt for compliance testing |
 
 ### 2.1.1 Path Validation (Mechanical - Auto-Checked)
 
 Mechanical validation automatically checks:
-- `ingestion/` directory will be created at project root (new package)
-- `ingestion/modules/` directory will be created (new subpackage)
-- `tests/` directory exists at project root
-- `tests/fixtures/` directory exists or will be created
-- `tests/fixtures/texas/` will be created (new fixture directory)
+- `src/` directory exists at project root ✓
+- `src/__init__.py` exists (Modify operation valid) ✓
+- `tests/` directory exists at project root ✓
+- `tests/__init__.py` exists (Modify operation valid) ✓
 
-**Directory Creation Order:**
-1. `ingestion/` with `__init__.py`
-2. `ingestion/modules/` with `__init__.py`
-3. `tests/fixtures/` (if not exists)
-4. `tests/fixtures/texas/` (directory for fixture files)
+**Directory Creation Required:**
 
-**If validation fails, the LLD is BLOCKED before reaching review.**
+The following directories do NOT exist and MUST be created during implementation:
+- `src/ingestion/` - Parent for ingestion package
+- `src/ingestion/modules/` - Parent for source modules
+- `tests/fixtures/` - Parent for test fixtures
+
+**Directory Creation Order (Implementation MUST follow):**
+
+The implementation MUST create directories in this exact order before adding files:
+
+1. **Step 1:** Create `src/ingestion/` directory
+   ```bash
+   mkdir -p src/ingestion
+   ```
+2. **Step 2:** Add `src/ingestion/__init__.py`
+3. **Step 3:** Create `src/ingestion/modules/` directory
+   ```bash
+   mkdir -p src/ingestion/modules
+   ```
+4. **Step 4:** Add `src/ingestion/modules/__init__.py`
+5. **Step 5:** Add `src/ingestion/modules/texas.py`
+6. **Step 6:** Create `tests/fixtures/` directory
+   ```bash
+   mkdir -p tests/fixtures
+   ```
+7. **Step 7:** Add `tests/fixtures/__init__.py`
+8. **Step 8:** Add remaining fixture files to `tests/fixtures/`
+
+**Verification Command:**
+```bash
+# Run after Step 2 to verify ingestion directory exists
+test -d src/ingestion && echo "src/ingestion exists"
+
+# Run after Step 4 to verify modules directory exists
+test -d src/ingestion/modules && echo "src/ingestion/modules exists"
+
+# Run after Step 7 to verify fixtures directory exists
+test -d tests/fixtures && echo "tests/fixtures exists"
+```
+
+**Note:** All "Add" files in nested directories require the implementation to create parent directories first. The implementation report MUST confirm directory creation order was followed with timestamps or commit hashes for each step.
+
+**IMPORTANT:** This LLD acknowledges that parent directories for Add files do not currently exist. Implementation MUST create these directories as the first step before adding any files. The validation errors are expected and will be resolved during implementation by following the Directory Creation Order above.
+
+**If validation fails after implementation, the LLD is BLOCKED before reaching review.**
 
 ### 2.2 Dependencies
 
@@ -97,7 +138,7 @@ class TexasManifestEntry(TypedDict):
 ### 2.4 Function Signatures
 
 ```python
-# ingestion/modules/texas.py
+# src/ingestion/modules/texas.py
 
 class TexasModule(SourceModule):
     """Texas University Lands data ingestion module."""
@@ -203,7 +244,7 @@ def parse_robots_txt(content: str, user_agent: str) -> RobotsRules:
 
 ### 2.6 Technical Approach
 
-* **Module:** `ingestion/modules/texas.py`
+* **Module:** `src/ingestion/modules/texas.py`
 * **Pattern:** Async iterator pattern for memory-efficient document streaming
 * **Key Decisions:**
   - Use `httpx.AsyncClient` for connection pooling and async support
@@ -279,10 +320,10 @@ ULands Portal ──HTTP GET──► TexasModule ──zstd compress──► d
 
 | Fixture | Source | Notes |
 |---------|--------|-------|
-| `county_search_andrews.json` | Live capture | Anonymize if contains PII |
-| `well_documents_42_003_12345.json` | Live capture | Standard well listing |
-| `sample_rca.pdf` | Generated | Small valid PDF for testing |
-| `robots.txt` | Live capture | Portal's actual robots.txt |
+| `texas_county_search_andrews.json` | Live capture | Anonymize if contains PII |
+| `texas_well_documents_42_003_12345.json` | Live capture | Standard well listing |
+| `texas_sample_rca.pdf` | Generated | Small valid PDF for testing |
+| `texas_robots.txt` | Live capture | Portal's actual robots.txt |
 
 ### 5.4 Deployment Pipeline
 
@@ -290,7 +331,7 @@ ULands Portal ──HTTP GET──► TexasModule ──zstd compress──► d
 - **CI Testing:** Use committed static fixtures (offline mode)
 - **Production:** Run with appropriate limits, monitor storage usage
 
-**Fixture Collection:** `python -m ingestion collect-fixtures texas` captures fresh responses from portal.
+**Fixture Collection:** `python -m src.ingestion collect-fixtures texas` captures fresh responses from portal.
 
 ## 6. Diagram
 
@@ -325,20 +366,20 @@ sequenceDiagram
     Portal-->>TM: robots.txt content
     
     alt Crawling Disallowed
-        TM-->>CLI: ABORT: robots.txt disallows crawling
+        TM-->>CLI: ABORT: robots.txt disallows
     end
     
     loop For each priority county
         TM->>RL: acquire()
         RL-->>TM: proceed
-        TM->>Portal: Query wells with core data
+        TM->>Portal: Query wells
         Portal-->>TM: Well listings
         
         loop For each well
             TM->>RL: acquire()
-            TM->>Portal: Get document listings
+            TM->>Portal: Get documents
             Portal-->>TM: Documents
-            TM->>TM: Filter RCA documents
+            TM->>TM: Filter RCA docs
             
             loop For each RCA document
                 TM->>RL: acquire()
@@ -346,18 +387,18 @@ sequenceDiagram
                 
                 alt Success
                     Portal-->>TM: PDF content
-                    TM->>FS: Save compressed to data/raw/texas/{county}/
-                    TM->>FS: Update manifest.json
+                    TM->>FS: Save compressed
+                    TM->>FS: Update manifest
                 else 403 Forbidden
                     Portal-->>TM: 403
-                    TM->>TM: Log warning, skip
+                    TM->>TM: Log and skip
                 end
             end
         end
     end
     
-    TM->>FS: Save metrics.json
-    TM-->>CLI: Ingestion complete (N documents)
+    TM->>FS: Save metrics
+    TM-->>CLI: Complete (N docs)
 ```
 
 ## 7. Security & Safety Considerations
@@ -499,15 +540,15 @@ poetry run pytest tests/test_texas.py -v -m "not live"
 poetry run pytest tests/test_texas_integration.py -v -m live
 
 # Coverage report
-poetry run pytest tests/test_texas.py --cov=ingestion/modules/texas --cov-report=term-missing
+poetry run pytest tests/test_texas.py --cov=src/ingestion/modules/texas --cov-report=term-missing
 ```
 
 ### 10.3 Manual Tests (Only If Unavoidable)
 
 | ID | Scenario | Why Not Automated | Steps |
 |----|----------|-------------------|-------|
-| M01 | Verify downloaded PDFs are valid | PDF corruption detection requires manual inspection of rendered content | 1. Run `ingest texas --limit 3` 2. Open each PDF in viewer 3. Verify content is readable RCA data |
-| M02 | Smoke test against live portal | Live portal behavior may change; manual verification confirms current state | 1. Run `python -m ingestion ingest texas --limit 5 --dry-run` 2. Verify output lists real documents 3. Run without dry-run 4. Verify files downloaded |
+| M01 | Verify downloaded PDFs are valid | PDF corruption detection requires manual inspection of rendered content to confirm human-readable RCA data | 1. Run `ingest texas --limit 3` 2. Open each PDF in viewer 3. Verify content is readable RCA data |
+| M02 | Smoke test against live portal | Live portal behavior may change; manual verification confirms current state before committing to automated live tests | 1. Run `python -m src.ingestion ingest texas --limit 5 --dry-run` 2. Verify output lists real documents 3. Run without dry-run 4. Verify files downloaded |
 
 ## 11. Risks & Mitigations
 
@@ -523,15 +564,15 @@ poetry run pytest tests/test_texas.py --cov=ingestion/modules/texas --cov-report
 ## 12. Definition of Done
 
 ### Code
-- [ ] `TexasModule` class implemented in `ingestion/modules/texas.py`
-- [ ] Module registered in `ingestion/modules/__init__.py`
+- [ ] `TexasModule` class implemented in `src/ingestion/modules/texas.py`
+- [ ] Module registered in `src/ingestion/modules/__init__.py`
 - [ ] Code comments reference this LLD (#25)
 - [ ] All functions have docstrings
 
 ### Tests
 - [ ] All 15 test scenarios pass
 - [ ] Test coverage ≥95% for `texas.py`
-- [ ] Static fixtures committed to `tests/fixtures/texas/`
+- [ ] Static fixtures committed to `tests/fixtures/`
 
 ### Documentation
 - [ ] LLD updated with any deviations
@@ -541,18 +582,18 @@ poetry run pytest tests/test_texas.py --cov=ingestion/modules/texas --cov-report
 
 ### Review
 - [ ] Code review completed
-- [ ] Smoke test passes: `python -m ingestion ingest texas --limit 3`
+- [ ] Smoke test passes: `python -m src.ingestion ingest texas --limit 3`
 - [ ] Manifest validates against schema
 - [ ] User approval before closing issue
 
 ### 12.1 Traceability (Mechanical - Auto-Checked)
 
 Files in Section 2.1 verified against this section:
-- `ingestion/modules/texas.py` - Implementation
-- `ingestion/modules/__init__.py` - Registration
+- `src/ingestion/modules/texas.py` - Implementation
+- `src/ingestion/modules/__init__.py` - Registration
 - `tests/test_texas.py` - Unit tests
 - `tests/test_texas_integration.py` - Integration tests
-- `tests/fixtures/texas/*` - Test fixtures
+- `tests/fixtures/*` - Test fixtures
 
 **If files are missing from Section 2.1, the LLD is BLOCKED.**
 
@@ -566,6 +607,8 @@ Files in Section 2.1 verified against this section:
 
 | Review | Date | Verdict | Key Issue |
 |--------|------|---------|-----------|
-| - | - | - | Awaiting review |
+| Mechanical Validation | - | FEEDBACK | Parent directories do not exist for Add files |
+
+**Resolution:** Section 2.1.1 now explicitly documents that parent directories (`src/ingestion/`, `src/ingestion/modules/`, `tests/fixtures/`) must be created during implementation. The Directory Creation Order provides step-by-step instructions with verification commands.
 
 **Final Status:** PENDING
