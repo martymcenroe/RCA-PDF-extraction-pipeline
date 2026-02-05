@@ -1,3 +1,10 @@
+---
+repo: martymcenroe/RCA-PDF-extraction-pipeline
+issue: 25
+url: https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/issues/25
+fetched: 2026-02-05T15:31:33.904792Z
+---
+
 # Issue #25: Texas University Lands Data Ingestion Module
 
 # Texas University Lands Data Ingestion Module
@@ -94,19 +101,19 @@ Based on preliminary portal analysis:
 - No PII collected; well data is public record
 
 ## Files to Create/Modify
-- `src/ingestion/modules/texas.py` â€” New module implementing `TexasModule` class
-- `src/ingestion/modules/__init__.py` â€” Register Texas module in module registry
-- `tests/ingestion/test_texas.py` â€” Unit tests for module functionality
-- `tests/ingestion/test_texas_integration.py` â€” Integration tests with mocked server
-- `tests/ingestion/fixtures/texas/` â€” Static HTML/JSON fixtures from portal for offline development
+- `src/ingestion/modules/texas.py` — New module implementing `TexasModule` class
+- `src/ingestion/modules/__init__.py` — Register Texas module in module registry
+- `tests/ingestion/test_texas.py` — Unit tests for module functionality
+- `tests/ingestion/test_texas_integration.py` — Integration tests with mocked server
+- `tests/ingestion/fixtures/texas/` — Static HTML/JSON fixtures from portal for offline development
 
 ## Static Test Fixtures
 
 To enable offline development and deterministic testing:
-- `tests/ingestion/fixtures/texas/county_search_andrews.json` â€” Sample county search response
-- `tests/ingestion/fixtures/texas/well_documents_42_003_12345.json` â€” Sample well document listing
-- `tests/ingestion/fixtures/texas/sample_rca.pdf` â€” Small sample PDF for download tests
-- `tests/ingestion/fixtures/texas/robots.txt` â€” Cached robots.txt for compliance testing
+- `tests/ingestion/fixtures/texas/county_search_andrews.json` — Sample county search response
+- `tests/ingestion/fixtures/texas/well_documents_42_003_12345.json` — Sample well document listing
+- `tests/ingestion/fixtures/texas/sample_rca.pdf` — Small sample PDF for download tests
+- `tests/ingestion/fixtures/texas/robots.txt` — Cached robots.txt for compliance testing
 
 **Fixture Collection:** Run `python -m src.ingestion collect-fixtures texas` to capture fresh responses from portal (requires network access, one-time operation).
 
@@ -116,11 +123,11 @@ To enable offline development and deterministic testing:
 - `zstandard` compression library available
 
 ## Out of Scope (Future)
-- **LAS file parsing** â€” Focus on PDF acquisition first; structured data extraction deferred
-- **Production data ingestion** â€” RCA documents only for initial implementation
-- **Historical backfill optimization** â€” Standard discovery sufficient for MVP
-- **Multi-state expansion** â€” Texas-only; other state modules are separate issues
-- **Proxy rotation** â€” Not implementing unless IP bans encountered in production
+- **LAS file parsing** — Focus on PDF acquisition first; structured data extraction deferred
+- **Production data ingestion** — RCA documents only for initial implementation
+- **Historical backfill optimization** — Standard discovery sufficient for MVP
+- **Multi-state expansion** — Texas-only; other state modules are separate issues
+- **Proxy rotation** — Not implementing unless IP bans encountered in production
 
 ## Acceptance Criteria
 - [ ] `TexasModule` class inherits from `SourceModule` and implements required interface
@@ -183,7 +190,7 @@ def test_robots_txt_disallowed_aborts(self, mock_robots): ...
 ### Integration Test Scenarios
 ```python
 def test_end_to_end_download(self, mock_texas_server):
-    """Full flow: discover â†’ filter â†’ download â†’ manifest."""
+    """Full flow: discover → filter → download → manifest."""
 
 def test_county_rotation(self, mock_texas_server):
     """Verify multiple counties are queried when limit allows."""
