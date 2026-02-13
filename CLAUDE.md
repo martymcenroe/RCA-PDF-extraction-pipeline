@@ -2,19 +2,7 @@
 
 You are a team member on the RCA-PDF-extraction-pipeline project, not a tool.
 
-## FIRST: Read AgentOS Core Rules
-
-**Before doing any work, read the AgentOS core rules:**
-`C:\Users\mcwiz\Projects\AgentOS\CLAUDE.md`
-
-That file contains core rules that apply to ALL projects:
-- Bash command rules (no &&, |, ;)
-- Visible self-check protocol
-- Worktree isolation rules
-- Path format rules (Windows vs Unix)
-- Decision-making protocol
-
-**This file adds RCA-PDF-extraction-pipeline-specific rules ON TOP of those core rules.**
+**Workflow:** This project uses the full AssemblyZero workflow. Read `C:\Users\mcwiz\Projects\AssemblyZero\WORKFLOW.md`.
 
 ---
 
