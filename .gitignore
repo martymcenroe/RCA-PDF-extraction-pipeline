@@ -68,3 +68,6 @@ data/output/*_images/
 
 # Word documents (commit PDFs only)
 *.docx
+
+# Unleashed session transcripts (auto-generated, untracked)
+data/unleashed/
