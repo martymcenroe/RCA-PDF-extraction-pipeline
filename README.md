@@ -97,10 +97,10 @@ coordinates. Trade-off noted: it is AGPL-licensed.
 
 ## Documentation
 
-- [Validation](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Validation) — acceptance criteria and how each is met
-- [Architecture](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Architecture) — design decisions and trade-offs
-- [Performance](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Performance) — benchmarks and scalability
-- [Extensions](https://github.com/martymcenroe/RCA-PDF-extraction-pipeline/wiki/Extensions) — database approach and web viewer
+- [Validation](https://github.com/martymcenroe/pdf-table-extractor/wiki/Validation) — acceptance criteria and how each is met
+- [Architecture](https://github.com/martymcenroe/pdf-table-extractor/wiki/Architecture) — design decisions and trade-offs
+- [Performance](https://github.com/martymcenroe/pdf-table-extractor/wiki/Performance) — benchmarks and scalability
+- [Extensions](https://github.com/martymcenroe/pdf-table-extractor/wiki/Extensions) — database approach and web viewer
 
 ---
 
