@@ -2,7 +2,7 @@
 """
 Submission Audit Script
 
-Verifies assignment compliance by running automated checks against
+Verifies acceptance-criteria compliance by running automated checks against
 the requirements defined in docs/standards/00801-audit-methodology.md
 
 Usage:
@@ -631,7 +631,7 @@ def generate_report(results: list[CheckResult]) -> str:
         "# Submission Audit Report",
         "",
         f"**Generated:** {datetime.now().isoformat()}",
-        f"**Project:** RCA-PDF-extraction-pipeline",
+        f"**Project:** pdf-table-extractor",
         "",
         "---",
         "",

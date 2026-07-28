@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import sqlite3
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -41,13 +42,11 @@ EXPECTED_COLUMN_COUNTS = {
 # Merged cell indicators that should be replicated across column groups
 MERGED_INDICATORS = ['+', '**', '<0.0001', '<']
 
-# Allowed output directories for security
+# Allowed output roots for the path-traversal guard: the working directory
+# and the system temp dir, computed at runtime (no machine-specific paths).
 ALLOWED_OUTPUT_ROOTS = [
-    '/c/Users/mcwiz/Projects/RCA-PDF-extraction-pipeline',
-    '/tmp/',
-    'C:\\Users\\mcwiz\\Projects\\RCA-PDF-extraction-pipeline',
-    'C:\\Users\\mcwiz\\AppData\\Local\\Temp',  # Windows temp
-    '/c/Users/mcwiz/AppData/Local/Temp',  # Unix-style Windows temp
+    str(Path.cwd()),
+    tempfile.gettempdir(),
 ]
 
 
@@ -301,7 +300,7 @@ class CoreAnalysisExtractor:
         Verify headers are consistent across all table pages.
 
         Extracts headers from each table page and compares them to ensure
-        consistency. This addresses the assignment requirement to "handle
+        consistency. This addresses the requirement to "handle
         any potential header variations across pages."
 
         Args:
@@ -768,7 +767,7 @@ class CoreAnalysisExtractor:
         raise ValueError(f"Output path '{output_path}' outside allowed directories")
 
     def get_classification_dict(self, result: ExtractionResult) -> dict[str, str]:
-        """Get classification as a simple dictionary for the assignment."""
+        """Get classification as a simple dictionary for the consumer."""
         return {
             f"page_{c.page_number}": c.page_type
             for c in result.classifications
@@ -845,7 +844,7 @@ class CoreAnalysisExtractor:
         return str(output_path)
 
     def save_classification(self, result: ExtractionResult, output_path: str) -> str:
-        """Save page classification to JSON (Part 1 of assignment).
+        """Save page classification to JSON (Part 1 (page classification)).
 
         Outputs a flat dictionary: {"page_1": "other", "page_39": "table", ...}
 
@@ -874,7 +873,7 @@ class CoreAnalysisExtractor:
         """
         Verify headers across table pages and save results to a text file.
 
-        This addresses the assignment requirement to "handle any potential
+        This addresses the requirement to "handle any potential
         header variations across pages" by verifying all table pages have
         consistent headers.
 
@@ -945,7 +944,7 @@ class CoreAnalysisExtractor:
     def save_json(self, result: ExtractionResult, output_path: str) -> str:
         """Save extraction result to JSON (legacy bundled format).
 
-        Note: For assignment deliverables, use save_classification() instead.
+        Note: For canonical outputs, use save_classification() instead.
 
         Raises:
             ValueError: If output_path is outside allowed directories.
@@ -1039,7 +1038,7 @@ def main():
     extractor.print_summary(result)
 
     if not args.classify_only:
-        # LLD-015: New output filenames matching assignment terminology
+        # LLD-015: New output filenames matching specification terminology
         csv_path = extractor.save_csv(
             result,
             f"{args.output}/full_table_extraction.csv",

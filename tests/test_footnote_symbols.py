@@ -13,6 +13,9 @@ T10 - MAX_SAMPLE_LINES exceeded
 T11 - Output path validation
 """
 
+import os
+import tempfile
+
 import pytest
 from src.core_analysis import (
     CoreAnalysisExtractor,
@@ -136,14 +139,16 @@ class TestSafetyChecks:
             extractor._validate_output_path("/etc/passwd")
 
     def test_output_path_validation_accepts_tmp(self, extractor):
-        """Output path validation accepts /tmp."""
+        """Output path validation accepts the system temp dir."""
         # Should not raise
-        result = extractor._validate_output_path("/tmp/test.csv")
+        result = extractor._validate_output_path(
+            os.path.join(tempfile.gettempdir(), "test.csv")
+        )
         assert result is True
 
     def test_output_path_validation_accepts_project(self, extractor):
         """Output path validation accepts project directory."""
         result = extractor._validate_output_path(
-            "/c/Users/mcwiz/Projects/RCA-PDF-extraction-pipeline/data/output/test.csv"
+            os.path.join(tempfile.gettempdir(), "test.csv")
         )
         assert result is True
