@@ -1,4 +1,4 @@
-# RCA PDF Extraction Pipeline
+# PDF Table Extractor
 
 A Python pipeline that turns unstructured **Routine Core Analysis (RCA)** PDF
 reports — the multi-hundred-page documents that hold subsurface geological

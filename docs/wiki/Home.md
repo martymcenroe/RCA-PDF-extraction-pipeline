@@ -1,4 +1,4 @@
-# RCA PDF Extraction Pipeline
+# PDF Table Extractor
 
 A Python pipeline for extracting structured data from Routine Core Analysis (RCA) PDF documents.
 
