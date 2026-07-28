@@ -27,7 +27,7 @@ Use h3 headers (`###`) for each link to restore larger font size:
 
 ---
 
-### [[Assignment-Requirements]]
+### [[Validation]]
 
 ### [[Architecture]]
 
@@ -41,7 +41,7 @@ Plain links without headers:
 ```markdown
 [[Home]]
 
-[[Assignment-Requirements]]
+[[Validation]]
 ```
 
 This renders with smaller fonts than the default sidebar.

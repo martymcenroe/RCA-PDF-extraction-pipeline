@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The assignment specification requires us to "handle any potential header variations across pages" when extracting data from the multi-page RCA summary table (pages 39-42).
+The specification requires us to "handle any potential header variations across pages" when extracting data from the multi-page RCA summary table (pages 39-42).
 
 During investigation, we discovered that:
 1. All four table pages (39-42) contain identical headers in the PDF structure
@@ -28,8 +28,8 @@ We will implement a **verification-first approach**:
 
 ### Why not just assume headers are always identical?
 
-The assignment explicitly requires handling variations. Even if the current PDF has consistent headers, future PDFs may not. By implementing verification, we:
-- Satisfy the assignment requirement explicitly
+The specification explicitly requires handling variations. Even if the current PDF has consistent headers, future PDFs may not. By implementing verification, we:
+- Satisfy the requirement explicitly
 - Create an audit trail proving headers were checked
 - Detect any unexpected variations in future documents
 
@@ -49,13 +49,13 @@ The assignment explicitly requires handling variations. Even if the current PDF 
 
 - Creates a permanent record for audit purposes
 - Human-readable verification artifact
-- Can be included in submission/documentation
+- Can be included in implementation/documentation
 
 ## Consequences
 
 ### Positive
 
-- Assignment requirement explicitly satisfied with verification proof
+- Requirement explicitly satisfied with verification proof
 - Future header variations will be detected and logged
 - Verification report provides clear audit trail
 - No breaking changes to existing extraction logic

@@ -2,13 +2,13 @@
 
 **Status:** Blocker (missed requirement)
 **Effort:** Medium (4-8 hours)
-**Value:** Critical - core assignment requirement
+**Value:** Critical - core requirement
 
 ---
 
 ## Problem
 
-The assignment explicitly requires: "handle any potential header variations across pages."
+The specification explicitly requires: "handle any potential header variations across pages."
 
 Current implementation extracts tables page-by-page with no header awareness. Each table is stored independently:
 

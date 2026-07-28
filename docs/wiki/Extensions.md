@@ -1,6 +1,6 @@
 # Extensions
 
-Beyond the core assignment requirements, additional tooling was built for development and debugging workflows.
+Beyond the core requirements, additional tooling was built for development and debugging workflows.
 
 ## PDF Elementizer
 

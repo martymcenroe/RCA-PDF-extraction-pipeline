@@ -75,3 +75,10 @@ data/unleashed/
 # Session logs — internal-only; never publish (fleet sweep 2026-05-23, #59)
 docs/session-logs/
 docs/dom-dumps/
+
+# Agent/automation tooling — not part of the published project
+CLAUDE.md
+GEMINI.md
+.unleashed.json
+.claude/
+.agentos/

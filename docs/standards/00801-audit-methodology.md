@@ -1,12 +1,12 @@
 # Standard 00801: Submission Audit Methodology
 
-**Purpose:** Define a repeatable, automated methodology for auditing assignment compliance.
+**Purpose:** Define a repeatable, automated methodology for auditing acceptance-criteria compliance.
 
 ---
 
 ## Overview
 
-This document defines how to audit the RCA PDF extraction pipeline submission against the assignment requirements. The audit assumes an automated grading system that:
+This document defines how to audit the RCA PDF extraction pipeline implementation against the requirements. The audit assumes an automated grading system that:
 
 1. Clones the repository
 2. Runs verification scripts
@@ -17,7 +17,7 @@ This document defines how to audit the RCA PDF extraction pipeline submission ag
 
 ## Requirement Decomposition
 
-The assignment instructions are decomposed into **atomic, verifiable requirements**:
+The the requirements are decomposed into **atomic, verifiable requirements**:
 
 ### Category 1: Functional Requirements (MUST PASS)
 
@@ -146,7 +146,7 @@ These requirements **currently fail** and have associated briefs:
 |------|---------|-------|
 | Pre-commit | git hook | Quick checks (EXISTS, SCHEMA) |
 | PR | CI/CD | Full audit |
-| Pre-submission | Manual | Full audit + manual review |
+| Pre-implementation | Manual | Full audit + manual review |
 
 ---
 

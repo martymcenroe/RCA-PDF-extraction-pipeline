@@ -41,7 +41,7 @@ Added constants at module level per LLD spec:
 - Only formula-like patterns (e.g., `+1234`, `=SUM(A1)`) are escaped with leading `'`
 
 ### 5. Notes Column Removed
-- Original LLD specified a notes column, but it was not part of the assignment requirements
+- Original LLD specified a notes column, but it was not part of the requirements
 - Removed to keep output focused on extracting table data as specified
 - Output now has 12 columns matching the PDF table structure
 

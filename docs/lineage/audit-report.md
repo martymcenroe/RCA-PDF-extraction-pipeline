@@ -1,4 +1,4 @@
-# Submission Audit Report
+# Acceptance Audit Report
 
 **Generated:** 2026-01-30T02:41:47.218689
 **Project:** RCA-PDF-extraction-pipeline

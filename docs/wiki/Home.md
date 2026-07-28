@@ -6,7 +6,7 @@ A Python pipeline for extracting structured data from Routine Core Analysis (RCA
 
 | Page | Description |
 |------|-------------|
-| [[Assignment-Requirements]] | Audit results and deliverables |
+| [[Validation]] | Audit results and deliverables |
 | [[Architecture]] | Design decisions and trade-offs |
 | [[Code-Quality]] | Pylint 9.31/10, Maintainability A |
 | [[Security]] | Bandit scan, CSV injection protection |
@@ -16,7 +16,7 @@ A Python pipeline for extracting structured data from Routine Core Analysis (RCA
 
 ## Quick Start
 
-### Option A: pip (for graders/Docker)
+### Option A: pip (for reviewers/Docker)
 
 ```bash
 pip install -r requirements.txt
@@ -41,7 +41,7 @@ core-analysis data/output/extended/W20552_elements.db --output data/output/spec/
 
 Outputs are organized into two directories:
 
-### `data/output/spec/` - Assignment Deliverable
+### `data/output/spec/` - Specification Deliverable
 
 | File | Format | Contents |
 |------|--------|----------|

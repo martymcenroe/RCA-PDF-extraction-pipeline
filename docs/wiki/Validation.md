@@ -1,6 +1,6 @@
-# Assignment Requirements
+# Specification Requirements
 
-## Audit Results
+## Acceptance criteria — results
 
 | Req | Name | Status | Message |
 |-----|------|--------|---------|

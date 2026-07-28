@@ -34,7 +34,7 @@ Update Reason: Address Gemini Review #1 feedback (Tier 1/2 issues)
 | `src/extraction/forgery/signature_detector.py` | Add | Signature detection, handwritten verification, perceptual hash comparison |
 | `src/extraction/forgery/manipulation_detector.py` | Add | ELA, compression analysis, metadata inspection |
 | `src/extraction/forgery/confidence_scorer.py` | Add | Ensemble confidence scoring from multiple signals |
-| `src/extraction/forgery/input_sanitizer.py` | Add | Client-side validation before sandbox submission |
+| `src/extraction/forgery/input_sanitizer.py` | Add | Client-side validation before sandbox implementation |
 | `src/extraction/forgery/sandbox_client.py` | Add | Async client for forgery-sandbox-service communication |
 | `src/extraction/validators/authenticity_validator.py` | Add | Pipeline integration implementing validator interface |
 | `src/extraction/models/forgery_result.py` | Add | Data models for all detection results |
@@ -291,7 +291,7 @@ class InputSanitizer:
         ...
     
     def validate_file(self, file_path: Path) -> ValidationResult:
-        """Validate file before submission to sandbox."""
+        """Validate file before implementation to sandbox."""
         ...
     
     def check_magic_bytes(self, file_path: Path) -> tuple[bool, str]:
@@ -762,9 +762,9 @@ flowchart TB
 | 120 | Copy-paste artifact detection | Auto | Document with spliced region | splicing_artifacts non-empty | Splicing boundary detected |
 | 130 | Suspicious metadata detection | Auto | Document with multiple editors | metadata_suspicious=True | Editing history flagged |
 | 140 | Ensemble confidence scoring | Auto | Mixed signals | Calibrated overall_confidence | Score reflects signal combination |
-| 150 | Severity level assignment - CRITICAL | Auto | Low confidence result | severity=CRITICAL | Correct severity assignment |
-| 160 | Severity level assignment - WARNING | Auto | Moderate anomalies | severity=WARNING | Correct severity assignment |
-| 170 | Severity level assignment - INFO | Auto | Clean document | severity=INFO | Correct severity assignment |
+| 150 | Severity level specification - CRITICAL | Auto | Low confidence result | severity=CRITICAL | Correct severity specification |
+| 160 | Severity level specification - WARNING | Auto | Moderate anomalies | severity=WARNING | Correct severity specification |
+| 170 | Severity level specification - INFO | Auto | Clean document | severity=INFO | Correct severity specification |
 | 180 | Input sanitizer - valid file | Auto | Valid 10MB PDF | ValidationResult.valid=True | File accepted |
 | 190 | Input sanitizer - oversized file | Auto | 60MB file | ValidationResult.valid=False, error="file_too_large" | Rejected with reason |
 | 200 | Input sanitizer - wrong magic bytes | Auto | .pdf extension, JPEG content | ValidationResult.valid=False | Rejected with reason |
