@@ -1,4 +1,4 @@
-# Standard 00801: Submission Audit Methodology
+# Standard 00801: Acceptance Audit Methodology
 
 **Purpose:** Define a repeatable, automated methodology for auditing acceptance-criteria compliance.
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document defines how to audit the RCA PDF extraction pipeline implementation against the requirements. The audit assumes an automated grading system that:
+This document defines how to audit the PDF Table Extractor implementation against the requirements. The audit assumes an automated acceptance check that:
 
 1. Clones the repository
 2. Runs verification scripts

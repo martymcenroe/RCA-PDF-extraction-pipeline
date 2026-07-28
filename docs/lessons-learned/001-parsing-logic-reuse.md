@@ -13,7 +13,7 @@ Two extraction pipelines were built:
 1. **Database approach** (`core_analysis.py`) - Built first, correct parsing logic
 2. **Minimal approach** (`core_analysis_minimal.py`) - Built second, simplified (buggy) parsing logic
 
-The minimal version was created to demonstrate a "small pipeline" for grading. When writing it, I oversimplified the `_parse_sample_lines()` function instead of porting the tested logic from the database version.
+The minimal version was created to demonstrate a "small pipeline" for evaluation. When writing it, I oversimplified the `_parse_sample_lines()` function instead of porting the tested logic from the database version.
 
 **Result:** Fracture samples had values shifted into wrong columns.
 

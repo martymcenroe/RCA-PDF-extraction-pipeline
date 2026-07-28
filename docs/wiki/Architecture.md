@@ -6,10 +6,10 @@ Two solutions were implemented:
 
 | Approach | Pipeline | Use Case |
 |----------|----------|----------|
-| **Minimal** | PDF → PyMuPDF → CSV/JSON | Grading, batch processing |
+| **Minimal** | PDF → PyMuPDF → CSV/JSON | Batch processing |
 | **Database** | PDF → Elementizer → SQLite → Extractor → CSV/JSON | Development, debugging |
 
-## Minimal Approach (Recommended for Grading)
+## Minimal Approach (Recommended for Batch Use)
 
 ```mermaid
 flowchart LR

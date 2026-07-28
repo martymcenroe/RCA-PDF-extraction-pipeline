@@ -1,1 +1,1 @@
-# Tests for RCA PDF Extraction Pipeline
+# Tests for PDF Table Extractor

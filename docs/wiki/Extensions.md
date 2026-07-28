@@ -178,7 +178,7 @@ class CoreAnalysisExtractor:
 | Subsequent | 359 ms | 56 ms |
 | Debuggable | No | Yes |
 | Visual exploration | No | Yes |
-| Best for | Grading, CI/CD | Development |
+| Best for | CI/CD | Development |
 
 ## Future Extensions
 

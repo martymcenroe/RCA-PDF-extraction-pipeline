@@ -127,7 +127,7 @@ Assuming 256 MB memory, 1 second billed duration:
 
 | Use Case | Recommended Approach |
 |----------|---------------------|
-| Grading/evaluation | Minimal |
+| Evaluation | Minimal |
 | CI/CD pipeline | Minimal |
 | Batch processing | Minimal (parallel) |
 | Interactive exploration | Database + viewer |

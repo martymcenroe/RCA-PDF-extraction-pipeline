@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Submission Audit Script
+Acceptance Audit Script
 
 Verifies acceptance-criteria compliance by running automated checks against
 the requirements defined in docs/standards/00801-audit-methodology.md
@@ -628,7 +628,7 @@ def run_audit(verbose: bool = False) -> list[CheckResult]:
 def generate_report(results: list[CheckResult]) -> str:
     """Generate markdown audit report."""
     lines = [
-        "# Submission Audit Report",
+        "# Acceptance Audit Report",
         "",
         f"**Generated:** {datetime.now().isoformat()}",
         f"**Project:** pdf-table-extractor",
@@ -655,7 +655,7 @@ def generate_report(results: list[CheckResult]) -> str:
     # Blockers section
     blockers = [r for r in results if r.status == "BLOCKER"]
     if blockers:
-        lines.append("## 🚫 BLOCKERS (Must Fix Before Submission)")
+        lines.append("## 🚫 BLOCKERS (Must Fix Before Release)")
         lines.append("")
         for r in blockers:
             lines.append(f"### {r.req_id}: {r.name}")
@@ -734,13 +734,13 @@ def main():
     """Main entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Run submission audit")
+    parser = argparse.ArgumentParser(description="Run acceptance audit")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--output", "-o", default="docs/audit/audit-report.md",
                         help="Output report path")
     args = parser.parse_args()
 
-    print("Running submission audit...")
+    print("Running acceptance audit...")
     print("=" * 50)
 
     results = run_audit(verbose=args.verbose)

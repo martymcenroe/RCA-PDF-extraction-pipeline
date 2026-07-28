@@ -14,7 +14,7 @@ The audit script (Q2 check) skips pylint verification:
 | Q2 | Code is clean | SKIP | Could not parse pylint output |
 ```
 
-This means we have no automated code quality score, which is a grading criterion:
+This means we have no automated code quality score, which is a quality criterion:
 > "Engineering Quality: Is the code modular and clean?"
 
 ---
