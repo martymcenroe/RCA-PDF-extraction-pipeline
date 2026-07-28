@@ -8,7 +8,7 @@
 
 ## Problem
 
-Manual verification of 138 rows is tedious and error-prone. A grader might spot-check 5 rows and miss systematic errors (e.g., all fracture samples have shifted columns).
+Manual verification of 138 rows is tedious and error-prone. A reviewer might spot-check 5 rows and miss systematic errors (e.g., all fracture samples have shifted columns).
 
 ---
 
@@ -133,5 +133,5 @@ python scripts/validate_output.py data/output/core_analysis_minimal.csv
 
 1. [ ] Implement `validate_output.py`
 2. [ ] Add to test suite as integration test
-3. [ ] Generate validation report for grader
+3. [ ] Generate validation report for review
 4. [ ] Consider adding to pipeline as post-processing step

@@ -2,14 +2,14 @@
 
 **Status:** Blocker (missed requirement)
 **Effort:** Low (1-2 hours)
-**Value:** Critical - core assignment requirement
+**Value:** Critical - core requirement
 **Blocked by:** 004 (header normalization must detect headers first)
 
 ---
 
 ## Problem
 
-The assignment explicitly requires: "You must preserve column headers."
+The specification requires: "You must preserve column headers."
 
 Current implementation invents column names:
 
