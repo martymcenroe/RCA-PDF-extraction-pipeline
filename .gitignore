@@ -82,3 +82,16 @@ GEMINI.md
 .unleashed.json
 .claude/
 .agentos/
+
+# ── Never publish ─────────────────────────────────────────────────────────
+# Private research/planning material. Keep on local disk if present, but it
+# must NEVER enter this public repo. These paths are ignored so they cannot be
+# staged, committed, or pushed even if a working copy contains them.
+docs/research/
+docs/context/init/exercise-04-instructions.txt
+*.docx
+*Business Plan*
+*Strategic Business*
+*Forensic Integrity*
+*Deep Research*
+*deep-research*
